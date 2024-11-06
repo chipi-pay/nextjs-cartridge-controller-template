@@ -17,6 +17,7 @@ function provider() {
   });
 }
 export const connector = new ControllerConnector({
+
   policies: [
     {
       target: ETH_TOKEN_ADDRESS,
@@ -28,11 +29,14 @@ export const connector = new ControllerConnector({
       target: ETH_TOKEN_ADDRESS,
       method: "transfer",
     },
+    
     // Add more policies as needed
   ],
   // Uncomment to use a custom theme
   // theme: "dope-wars",
   // colorMode: "light"
+
+  rpc: "https://api.cartridge.gg/x/starknet/sepolia"
 });
 
 export function StarknetProvider({ children }: { children: React.ReactNode }) {
