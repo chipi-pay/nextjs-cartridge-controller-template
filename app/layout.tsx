@@ -16,7 +16,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "Chipi Pay @ Starknet's HH Bangkok",
-  description: "Next.js controller template.",
+  description: "Next.js Cartridge Controller template.",
 };
 
 export default function RootLayout({
@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#FFFDD0]`}
       >
         <StarknetProvider>{children}</StarknetProvider>
       </body>

@@ -18,7 +18,7 @@ export function ConnectWallet() {
     return (
         <div className="flex flex-col items-center gap-4">
             {address && (
-                <div className="text-sm font-mono">
+                <div className="p-3 bg-[#F9E6B2] rounded-md text-gray-800 font-mono text-sm">
                     <p className="mb-2">Account: {address}</p>
                     {username && <p>Username: {username}</p>}
                 </div>
@@ -28,7 +28,12 @@ export function ConnectWallet() {
                 onClick={() => {
                     address ? disconnect() : connect({ connector });
                 }}
-                className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
+                className={`px-6 py-3 rounded-md shadow-sm font-medium
+                    ${address 
+                        ? 'bg-[#FFC3C3] hover:bg-[#FFE0D7]' 
+                        : 'bg-[#FFAAAA] hover:bg-[#FFE0D7]'
+                    }
+                    text-gray-800 transition-colors duration-200 border border-[#FFC3C3]`}
             >
                 {address ? "Disconnect" : "Connect Wallet"}
             </button>
