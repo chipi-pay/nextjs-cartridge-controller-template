@@ -1,31 +1,47 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
-import { Chain, sepolia } from "@starknet-react/chains";
-import { StarknetConfig, starkscan } from "@starknet-react/core";
+import { Chain, sepolia, mainnet } from "@starknet-react/chains";
+import {
+  StarknetConfig,
+  voyager,
+  Connector,
+} from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector";
 import { RpcProvider } from "starknet";
+import { ETH_CONTRACT as ETH_TOKEN_ADDRESS } from "@/app/constants/contracts";
 
-// Create connector instance outside of component
-export const connector = new ControllerConnector({
-  rpc: "https://api.cartridge.gg/x/starknet/sepolia",
-  // Add any additional configuration as needed
-});
-
-// Configure RPC provider
-function provider(chain: Chain) {
+function provider() {
   return new RpcProvider({
-    nodeUrl: "https://api.cartridge.gg/x/starknet/sepolia",
+      nodeUrl: "https://api.cartridge.gg/x/starknet/sepolia",
   });
 }
+export const connector = new ControllerConnector({
+  policies: [
+    {
+      target: ETH_TOKEN_ADDRESS,
+      method: "approve",
+      description:
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+    },
+    {
+      target: ETH_TOKEN_ADDRESS,
+      method: "transfer",
+    },
+    // Add more policies as needed
+  ],
+  // Uncomment to use a custom theme
+  // theme: "dope-wars",
+  // colorMode: "light"
+});
 
 export function StarknetProvider({ children }: { children: React.ReactNode }) {
   return (
     <StarknetConfig
-      autoConnect
-      chains={[sepolia]}
-      connectors={[connector]}
-      explorer={starkscan}
+      chains={[mainnet, sepolia]}
       provider={provider}
+      connectors={[connector as never as Connector]}
+      explorer={voyager}
     >
       {children}
     </StarknetConfig>

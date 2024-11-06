@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@cartridge/connector": "^0.3.46",
-    "@cartridge/controller": "^0.3.46",
+    "@cartridge/controller": "0.5.0-alpha.5",
     "@starknet-react/chains": "^3.1.0",
     "@starknet-react/core": "^3.5.0",
     "get-starknet-core": "^4.0.0",
