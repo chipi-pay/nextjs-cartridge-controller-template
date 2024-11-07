@@ -9,25 +9,25 @@ import {
 } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
 import { RpcProvider } from "starknet";
-import { ETH_CONTRACT as ETH_TOKEN_ADDRESS } from "@/app/constants/contracts";
+import { USDC_CONTRACT as USDC_TOKEN_ADDRESS, STRK_FARM_USDC_SENSEI } from "@/app/constants/contracts";
 
 function provider() {
   return new RpcProvider({
-      nodeUrl: "https://api.cartridge.gg/x/starknet/sepolia",
+      nodeUrl: "https://api.cartridge.gg/x/starknet/mainnet",
   });
 }
 export const connector = new ControllerConnector({
 
   policies: [
     {
-      target: ETH_TOKEN_ADDRESS,
+      target: USDC_TOKEN_ADDRESS,
       method: "approve",
       description:
-        "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+        "Approve to ChipiPay contract to transfer USDC on your behalf.",
     },
     {
-      target: ETH_TOKEN_ADDRESS,
-      method: "transfer",
+      target: STRK_FARM_USDC_SENSEI,
+      method: "deposit",
     },
     
     // Add more policies as needed
@@ -36,15 +36,14 @@ export const connector = new ControllerConnector({
   // theme: "dope-wars",
   // colorMode: "light"
 
-  rpc: "https://api.cartridge.gg/x/starknet/sepolia",
+  rpc: "https://api.cartridge.gg/x/starknet/mainnet",
 
-  
 });
 
 export function StarknetProvider({ children }: { children: React.ReactNode }) {
   return (
     <StarknetConfig
-      chains={[mainnet, sepolia]}
+      chains={[mainnet]}
       provider={provider}
       connectors={[connector as never as Connector]}
       explorer={voyager}

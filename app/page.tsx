@@ -1,5 +1,6 @@
 import { ConnectWallet } from "@/app/components/ConnectWallet";
 import { TransferEth } from "@/app/components/TransferEth";
+import { InvestUsdc } from "@/app/components/InvestUsdc";
 import Image from "next/image";
 
 export default function Home() {
@@ -16,6 +17,7 @@ export default function Home() {
       </header>
       <main className="flex flex-col items-center justify-center gap-6">
         <ConnectWallet />
+        <InvestUsdc />
         <TransferEth />
       </main>
     </div>
