@@ -1,7 +1,7 @@
 'use client'
 import { useAccount, useExplorer } from "@starknet-react/core";
 import { useCallback, useState } from "react";
-import { USDC_CONTRACT, STRK_FARM_USDC_SENSEI, NIMBORA_STAKING_USDC } from "@/app/constants/contracts";
+import { USDC_CONTRACT, STRK_FARM_USDC_SENSEI } from "@/app/constants/contracts";
 
 export const InvestUsdc = () => {
     const [submitted, setSubmitted] = useState<boolean>(false);
