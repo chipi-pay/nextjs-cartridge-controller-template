@@ -1,5 +1,14 @@
 import { NextResponse } from 'next/server';
+import { type NextRequest } from 'next/server';
 
-export async function GET() {
-  return NextResponse.json({ message: 'Hello from the API' });
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const code = searchParams.get('code');
+  
+  const baseMessage = 'Hello from the API';
+  
+  // If code parameter exists, append it to the message
+  const message = code ? `${baseMessage} (Code: ${code})` : baseMessage;
+  
+  return NextResponse.json({ message });
 }

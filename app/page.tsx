@@ -14,7 +14,12 @@ export default function Home() {
     const fetchMessage = async () => {
       if (account) {
         try {
-          const response = await fetch('/api');
+          const urlParams = new URLSearchParams(window.location.search);
+          const code = urlParams.get('code');
+          
+          const apiUrl = code ? `/api?code=${code}` : '/api';
+          
+          const response = await fetch(apiUrl);
           const data = await response.json();
           setMessage(data.message);
         } catch (error) {
