@@ -1,7 +1,8 @@
 'use client'
-import { useAccount, useExplorer } from "@starknet-react/core";
+import { useAccount, useExplorer, useBalance } from "@starknet-react/core";
+import { cairo, Uint256 } from "starknet";
 import { useCallback, useState } from "react";
-import { USDC_CONTRACT, STRK_FARM_USDC_SENSEI } from "@/app/constants/contracts";
+import { USDC_CONTRACT, STRK_FARM_USDC_SENSEI, NIMBORA_STAKING_USDC } from "@/app/constants/contracts";
 
 export const InvestUsdc = () => {
     const [submitted, setSubmitted] = useState<boolean>(false);
@@ -9,32 +10,56 @@ export const InvestUsdc = () => {
     const explorer = useExplorer();
     const [txnHash, setTxnHash] = useState<string>();
 
+    const { data, error } = useBalance({
+        address: account?.address as `0x${string}`,
+        token: USDC_CONTRACT,
+    });
+
     const execute = useCallback(
-        async (amount: string) => {
-            if (!account) {
+        async (amount: Uint256) => {
+            if (!account || error) {
                 return;
             }
             setSubmitted(true);
             setTxnHash(undefined);
 
-            account
+            if(data && Number(data.formatted) >= 2) {
+                account
                 .execute([
                     {
                         contractAddress: USDC_CONTRACT,
                         entrypoint: "approve",
-                        calldata: [STRK_FARM_USDC_SENSEI, amount, "0x0"],
+                        calldata: [NIMBORA_STAKING_USDC, amount],
                     },
                     {
-                        contractAddress: STRK_FARM_USDC_SENSEI,
+                        contractAddress: NIMBORA_STAKING_USDC,
                         entrypoint: "deposit",
-                        calldata: [amount, "0x0", account?.address],
+                        calldata: [amount, account?.address, "0x02aC4A10e11A9DbcDE67cEE0539Ca54aB3c1188C06E3BCa750b0378765b47709"],
                     },
                 ])
                 .then(({ transaction_hash }) => setTxnHash(transaction_hash))
                 .catch((e) => console.error(e))
                 .finally(() => setSubmitted(false));
+            } else {
+            account
+                .execute([
+                    {
+                        contractAddress: USDC_CONTRACT,
+                        entrypoint: "approve",
+                        calldata: [STRK_FARM_USDC_SENSEI, amount],
+                    },
+                    {
+                        contractAddress: STRK_FARM_USDC_SENSEI,
+                        entrypoint: "deposit",
+                        calldata: [amount, account?.address],
+                    },
+                ])
+                .then(({ transaction_hash }) => setTxnHash(transaction_hash))
+                .catch((e) => console.error(e))
+                .finally(() => setSubmitted(false));
+            }
         },
-        [account]
+        [account, data, error]
     );
 
     if (!account) {
@@ -47,7 +72,7 @@ export const InvestUsdc = () => {
                 Invest your USDC
             </h2>
             <button
-                onClick={() => execute("0x0f4240")}
+                onClick={() => execute(cairo.uint256(1*10**6))}
                 disabled={submitted}
                 className={`w-full py-3 px-4 rounded-md shadow-sm
                     ${submitted 
