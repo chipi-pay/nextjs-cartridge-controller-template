@@ -14,7 +14,7 @@ export function ConnectWallet() {
     return (
         <div className="flex flex-col items-center gap-4">
             {address && (
-                <div className="text-sm font-mono">
+                <div className="text-sm font-mono text-gray-800">
                     <p className="mb-2">Account: {address}</p>
                     {username && <p>Username: {username}</p>}
                 </div>
