@@ -8,35 +8,34 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-//import { toast, useToast } from "@/components/ui/toast"
+import { useToast } from "@/hooks/use-toast"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import Image from "next/image"
 
 export function WalletInterface() {
   const [activeTab, setActiveTab] = useState("home")
-  //const { toast } = useToast()
+  const { toast } = useToast()
 
   const copyAddress = () => {
     navigator.clipboard.writeText("0x1234...5678")
-    /*
     toast({
       title: "Address copied!",
       description: "The wallet address has been copied to your clipboard.",
-    })*/
+    })
   }
 
   const friends = [
-    { id: 1, name: "Alex", image: "/chipi.png" },
-    { id: 2, name: "Maria", image: "/chipi.png" },
-    { id: 3, name: "John", image: "/chipi.png" },
+    { id: 1, name: "Alex", image: "/placeholder.png?height=32&width=32" },
+    { id: 2, name: "Maria", image: "/placeholder.png?height=32&width=32" },
+    { id: 3, name: "John", image: "/placeholder.png?height=32&width=32" },
   ]
 
   const buyOptions = [
-    { title: "Muay Thai class", image: "/chipi.png", price: 500 },
-    { title: "5x5 tattoo", image: "/chipi.png", price: 2000 },
-    { title: "Pad Thai", image: "/chipi.png", price: 120 },
-    { title: "UFC fight", image: "/chipi.png", price: 1500 },
-    { title: "More", image: "/chipi.png", price: 0 },
+    { title: "Muay Thai class", image: "/placeholder.png?height=80&width=160", price: 500 },
+    { title: "5x5 tattoo", image: "/placeholder.png?height=80&width=160", price: 2000 },
+    { title: "Pad Thai", image: "/placeholder.png?height=80&width=160", price: 120 },
+    { title: "UFC fight", image: "/placeholder.png?height=80&width=160", price: 1500 },
+    { title: "More", image: "/placeholder.png?height=80&width=160", price: 0 },
   ]
 
   const transactions = [
@@ -49,11 +48,13 @@ export function WalletInterface() {
     { emoji: "🏋️", category: "Gym", amount: -30.00, date: "Nov 1", friend: "@carldlfr" },
   ]
 
+
+
   const HomeView = () => (
     <div className="space-y-6">
       <div className="flex items-start gap-4 mb-6">
         <Avatar className="w-12 h-12 border-2 border-primary">
-          <AvatarImage src="/chipi.png" alt="@wellsja" />
+          <AvatarImage src="/placeholder.png?height=48&width=48" alt="@wellsja" />
           <AvatarFallback>JW</AvatarFallback>
         </Avatar>
         <div className="flex-1">
@@ -88,8 +89,8 @@ export function WalletInterface() {
           <CardContent className="pt-6 flex flex-col h-full">
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Invested Balance</h3>
             <p className="text-2xl font-bold mb-4">$5,678.90</p>
-            <Button variant="outline" className="mt-auto">
-              cruz pay
+            <Button variant="outline" size="sm" className="mt-auto bg-purple-100 text-purple-500 hover:bg-purple-200 hover:text-purple-600">
+               Invest
             </Button>
           </CardContent>
         </Card>
@@ -105,7 +106,7 @@ export function WalletInterface() {
         </Button>
       </div>
       <div>
-        <h3 className="text-lg font-medium mb-2">Mutual friends</h3>
+        <h3 className="text-lg font-medium mb-2">Friends</h3>
         <div className="flex items-center">
           <div className="flex -space-x-2 mr-2">
             {friends.map((friend) => (
@@ -115,7 +116,7 @@ export function WalletInterface() {
               </Avatar>
             ))}
           </div>
-          <span className="text-sm text-muted-foreground">8 friends in one network</span>
+          <span className="text-sm text-muted-foreground">8 friends</span>
         </div>
       </div>
       <div>
@@ -127,22 +128,18 @@ export function WalletInterface() {
                 <div className="p-1">
                   <Card className="overflow-hidden">
                     <CardContent className="p-0">
-                      <div className="relative w-full h-20">
-                        <Image 
-                          src={option.image} 
-                          alt={option.title} 
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        />
-                      </div>
+                      <Image 
+                        src={option.image} 
+                        alt={option.title} 
+                        height={80}
+                        width={160}
+                        className="w-full h-20 object-cover" 
+                      />
                       <div className="p-4">
                         <h4 className="font-semibold text-sm mb-1">{option.title}</h4>
-                        <p className="text-muted-foreground text-xs mb-2">
-                          {option.price > 0 ? `฿${option.price}` : 'Various prices'}
-                        </p>
-                        <Button size="sm" className="w-full">
-                          cruz pay
+                        <p className="text-muted-foreground text-xs mb-2">{option.price > 0 ? `฿${option.price}` : 'Various prices'}</p>
+                        <Button size="sm" className="w-full bg-purple-100 text-purple-500 hover:bg-purple-200 hover:text-purple-600">
+                          Buy
                         </Button>
                       </div>
                     </CardContent>
@@ -211,15 +208,12 @@ export function WalletInterface() {
         <Card className="flex-1">
           <CardContent className="p-6">
             <div className="flex justify-center mb-6">
-              <div className="relative h-10 w-32">
-                <Image 
-                  src="/chipi.png" 
-                  alt="Company Logo" 
-                  fill
-                  className="object-contain"
-                  priority
-                />
-              </div>
+              <Image 
+                src="/placeholder.png" 
+                alt="Company Logo" 
+                height={40} 
+                width={120} 
+              />
             </div>
             <TabsContent value="home">
               <HomeView />

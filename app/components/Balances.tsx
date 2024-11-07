@@ -4,6 +4,10 @@ import { USDC_CONTRACT, STRK_FARM_USDC_SENSEI, NIMBORA_STAKED_USD } from "@/app/
 
 export const Balances = () => {
     const { account } = useAccount();
+    const { data: ethBalance } = useBalance({
+        address: account?.address as `0x${string}`,
+    });
+
     const { data, error } = useBalance({
         address: account?.address as `0x${string}`,
         token: USDC_CONTRACT,
@@ -55,10 +59,19 @@ export const Balances = () => {
             <div className="space-y-4">
                 <div className="p-3 bg-[#F9E6B2] rounded">
                     <h3 className="text-sm font-semibold text-gray-700 mb-1">
+                        ETH Balance
+                    </h3>
+                    <p className="font-mono text-gray-800">
+                        {ethBalance ? Number(ethBalance.formatted).toFixed(4) : '0.0000'} ETH
+                    </p>
+                </div>
+
+                <div className="p-3 bg-[#F9E6B2] rounded">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-1">
                         USDC Wallet Balance
                     </h3>
                     <p className="font-mono text-gray-800">
-                        {data?.value.toString() || '0'}
+                        {data?.formatted || '0'}
                     </p>
                 </div>
 
@@ -67,7 +80,7 @@ export const Balances = () => {
                         Nimbora Staked USD
                     </h3>
                     <p className="font-mono text-gray-800">
-                        {nstUsd?.value.toString() || '0'}
+                        {nstUsd?.formatted || '0'}
                     </p>
                 </div>
 
