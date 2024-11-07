@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
-import { Chain, sepolia, mainnet } from "@starknet-react/chains";
+import { sepolia, mainnet } from "@starknet-react/chains";
 import {
   StarknetConfig,
   voyager,
   Connector,
 } from "@starknet-react/core";
-import ControllerConnector from "@cartridge/connector";
+import ControllerConnector from "@cartridge/connector/controller";
 import { RpcProvider } from "starknet";
 import { ETH_CONTRACT as ETH_TOKEN_ADDRESS } from "@/app/constants/contracts";
 
@@ -36,7 +36,7 @@ export const connector = new ControllerConnector({
   // theme: "dope-wars",
   // colorMode: "light"
 
-  rpc: "https://api.cartridge.gg/x/starknet/sepolia"
+  rpc: "https://api.cartridge.gg/x/starknet/sepolia",
 });
 
 export function StarknetProvider({ children }: { children: React.ReactNode }) {
@@ -46,6 +46,7 @@ export function StarknetProvider({ children }: { children: React.ReactNode }) {
       provider={provider}
       connectors={[connector as never as Connector]}
       explorer={voyager}
+
     >
       {children}
     </StarknetConfig>
