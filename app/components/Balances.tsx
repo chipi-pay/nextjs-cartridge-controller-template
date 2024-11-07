@@ -46,20 +46,40 @@ export const Balances = () => {
         return null;
     }
 
-  return (
-    <div>
-        <div>
-            <h2>USDC Wallet Balance</h2>
-            <p>{data?.value.toString()}</p>
+    return (
+        <div className="bg-[#FFFFEE] p-6 rounded-lg shadow-md max-w-md mx-auto border border-[#FFE0D7]">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">
+                Wallet Balances
+            </h2>
+            
+            <div className="space-y-4">
+                <div className="p-3 bg-[#F9E6B2] rounded">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-1">
+                        USDC Wallet Balance
+                    </h3>
+                    <p className="font-mono text-gray-800">
+                        {data?.value.toString() || '0'}
+                    </p>
+                </div>
+
+                <div className="p-3 bg-[#F9E6B2] rounded">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-1">
+                        Nimbora Staked USD
+                    </h3>
+                    <p className="font-mono text-gray-800">
+                        {nstUsd?.value.toString() || '0'}
+                    </p>
+                </div>
+
+                <div className="p-3 bg-[#F9E6B2] rounded">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-1">
+                        STRK Farm Balance
+                    </h3>
+                    <p className="font-mono text-gray-800">
+                        {strk_balance?.toString() || '0'}
+                    </p>
+                </div>
+            </div>
         </div>
-        <div>
-            <h2>Nimbora Staked USD</h2>
-            <p>{nstUsd?.value.toString()}</p>
-        </div>
-        <div>
-            <h2>STRK Farm Balance</h2>
-            <p>{strk_balance?.toString()}</p>
-        </div>
-    </div>
-  )
+    );
 }

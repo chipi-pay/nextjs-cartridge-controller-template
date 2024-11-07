@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const code = searchParams.get('code');
   
-  const baseMessage = 'Hello from the API';
+  const baseMessage = 'Hello from Bangkok';
   
   // If code parameter exists, append it to the message
   const message = code ? `${baseMessage} (Code: ${code})` : baseMessage;
