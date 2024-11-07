@@ -37,6 +37,7 @@ export const connector = new ControllerConnector({
   // colorMode: "light"
 
   rpc: "https://api.cartridge.gg/x/starknet/mainnet",
+
 });
 
 export function StarknetProvider({ children }: { children: React.ReactNode }) {
