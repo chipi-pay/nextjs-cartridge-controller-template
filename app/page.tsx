@@ -2,6 +2,7 @@
 import { ConnectWallet } from "@/app/components/ConnectWallet";
 import { TransferEth } from "@/app/components/TransferEth";
 import { InvestUsdc } from "@/app/components/InvestUsdc";
+import { Balances } from "@/app/components/Balances";
 import { useAccount } from "@starknet-react/core";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -44,6 +45,7 @@ export default function Home() {
       </header>
       <main className="flex flex-col items-center justify-center gap-6">
         <ConnectWallet />
+        <Balances />
         {account && message && (
           <p className="text-center text-gray-700">{message}</p>
         )}
