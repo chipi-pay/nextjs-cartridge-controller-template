@@ -22,11 +22,12 @@ export function ConnectWallet() {
             <button
                 onClick={(e) => {
                     e.preventDefault();
-                    
                     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-                    address ? disconnect() : connect({ connector });
+                    address ? disconnect() : connect({connector});
                 }}
-                className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
+                className={`py-3 px-4 rounded-md shadow-sm
+                    bg-[#FFAAAA] hover:bg-[#FFE0D7] text-gray-800
+                    transition-colors duration-200 font-medium border border-[#FFC3C3]`}
             >
                 {address ? "Disconnect" : "Connect Wallet"}
             </button>
