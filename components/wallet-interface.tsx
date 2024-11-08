@@ -1,42 +1,52 @@
 'use client'
 
 import { useState } from "react"
+import { useAccount } from "@starknet-react/core"
+import { ConnectWallet } from "@/app/components/ConnectWallet"
 import { ArrowUp, Copy, Home, Clock, MessageCircle, Plus, Gift } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import Image from "next/image"
+import { Toaster } from "@/components/ui/toaster"
+import { useWalletBalances } from "@/hooks/use-wallet-balances"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
+type Transaction = {
+  emoji: string
+  category: string
+  amount: number
+  date: string
+  friend: string
+}
 
 export function WalletInterface() {
   const [activeTab, setActiveTab] = useState("home")
-  const { toast } = useToast()
+  const { account } = useAccount()
 
-  const copyAddress = () => {
-    navigator.clipboard.writeText("0x1234...5678")
-    toast({
-      title: "Address copied!",
-      description: "The wallet address has been copied to your clipboard.",
-    })
+  // If not connected, show connect wallet screen
+  if (!account) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex flex-col items-center justify-center p-6">
+        <div className="mb-8">
+          <Image 
+            src="/chipi.png" 
+            alt="Company Logo" 
+            height={40} 
+            width={120} 
+          />
+        </div>
+        <Card className="w-full max-w-md">
+          <CardContent className="p-6 text-center">
+            <h2 className="text-xl font-semibold mb-4">Connect Your Wallet</h2>
+            <ConnectWallet />
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
-
-  const friends = [
-    { id: 1, name: "Alex", image: "/placeholder.png?height=32&width=32" },
-    { id: 2, name: "Maria", image: "/placeholder.png?height=32&width=32" },
-    { id: 3, name: "John", image: "/placeholder.png?height=32&width=32" },
-  ]
-
-  const buyOptions = [
-    { title: "Muay Thai class", image: "/placeholder.png?height=80&width=160", price: 500 },
-    { title: "5x5 tattoo", image: "/placeholder.png?height=80&width=160", price: 2000 },
-    { title: "Pad Thai", image: "/placeholder.png?height=80&width=160", price: 120 },
-    { title: "UFC fight", image: "/placeholder.png?height=80&width=160", price: 1500 },
-    { title: "More", image: "/placeholder.png?height=80&width=160", price: 0 },
-  ]
 
   const transactions = [
     { emoji: "🎉", category: "Chipi Feria", amount: 100.00, date: "Today", friend: "@dylankugler" },
@@ -44,29 +54,82 @@ export function WalletInterface() {
     { emoji: "💼", category: "Salary", amount: 2000.00, date: "Nov 5", friend: "@espejelomar" },
     { emoji: "🚕", category: "Transport", amount: -15.75, date: "Nov 4", friend: "@annabel" },
     { emoji: "🎁", category: "Gift", amount: 50.00, date: "Nov 3", friend: "@haycarlitos" },
-    { emoji: "📚", category: "Education", amount: -100.00, date: "Nov 2", friend: "@0xvato" },
-    { emoji: "🏋️", category: "Gym", amount: -30.00, date: "Nov 1", friend: "@carldlfr" },
   ]
 
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+      <Toaster />
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="min-h-screen flex flex-col">
+        <Card className="flex-1">
+          <CardContent className="p-6">
+            <div className="flex justify-center mb-6">
+              <Image 
+                src="/chipi.png" 
+                alt="Company Logo" 
+                height={40} 
+                width={120} 
+              />
+            </div>
+            <TabsContent value="home">
+              <HomeView />
+            </TabsContent>
+            <TabsContent value="history">
+              <HistoryView transactions={transactions} />
+            </TabsContent>
+          </CardContent>
+        </Card>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="home" className="py-2.5">
+            <Home className="w-5 h-5 mr-2" />
+            Home
+          </TabsTrigger>
+          <TabsTrigger value="history" className="py-2.5">
+            <Clock className="w-5 h-5 mr-2" />
+            History
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+    </div>
+  )
+}
 
+const HomeView = () => {
+  const { balances } = useWalletBalances()
+  const { account } = useAccount()
+  const { toast } = useToast()
 
-  const HomeView = () => (
+  const copyAddress = () => {
+    if (account?.address) {
+      navigator.clipboard.writeText(account.address)
+      toast({
+        title: "Address copied!",
+        description: "The wallet address has been copied to your clipboard.",
+      })
+    }
+  }
+
+  return (
     <div className="space-y-6">
       <div className="flex items-start gap-4 mb-6">
         <Avatar className="w-12 h-12 border-2 border-primary">
-          <AvatarImage src="/placeholder.png?height=48&width=48" alt="@wellsja" />
+          <AvatarImage src="/sherk.jpeg?height=48&width=48" alt="@wellsja" />
           <AvatarFallback>JW</AvatarFallback>
         </Avatar>
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-semibold">Jaboris Wells</h2>
-            <Badge variant="secondary" className="bg-pink-100 text-pink-500 hover:bg-pink-100">
-              Pro
-            </Badge>
+            <h2 className="text-xl font-semibold">
+              {account ? `${account.address.slice(0, 6)}...${account.address.slice(-4)}` : 'Connect Wallet'}
+            </h2>
           </div>
-          <Button variant="ghost" size="sm" onClick={copyAddress} className="p-0 h-auto font-normal text-muted-foreground">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={copyAddress} 
+            className="p-0 h-auto font-normal text-muted-foreground"
+            disabled={!account}
+          >
             <Copy className="w-3 h-3 mr-1" />
-            0x1234...5678
+            {account ? `${account.address.slice(0, 6)}...${account.address.slice(-4)}` : '0x0000...0000'}
           </Button>
         </div>
         <div className="flex gap-2">
@@ -82,15 +145,23 @@ export function WalletInterface() {
         <Card>
           <CardContent className="pt-6">
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Cash Balance</h3>
-            <p className="text-2xl font-bold">$1,234.56</p>
+            <p className="text-2xl font-bold">${balances.cashBalance.toFixed(2)}</p>
+            <div className="mt-2 text-sm text-muted-foreground">
+              <div>ETH: {balances.eth.toFixed(4)}</div>
+              <div>USDC: ${balances.usdc.toFixed(2)}</div>
+            </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6 flex flex-col h-full">
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Invested Balance</h3>
-            <p className="text-2xl font-bold mb-4">$5,678.90</p>
-            <Button variant="outline" size="sm" className="mt-auto bg-purple-100 text-purple-500 hover:bg-purple-200 hover:text-purple-600">
-               Invest
+            <p className="text-2xl font-bold mb-4">${balances.investedBalance.toFixed(2)}</p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="mt-auto bg-purple-100 text-purple-500 hover:bg-purple-200 hover:text-purple-600"
+            >
+              Invest More
             </Button>
           </CardContent>
         </Card>
@@ -105,57 +176,12 @@ export function WalletInterface() {
           Redeem
         </Button>
       </div>
-      <div>
-        <h3 className="text-lg font-medium mb-2">Friends</h3>
-        <div className="flex items-center">
-          <div className="flex -space-x-2 mr-2">
-            {friends.map((friend) => (
-              <Avatar key={friend.id} className="border-2 border-background">
-                <AvatarImage src={friend.image} alt={friend.name} />
-                <AvatarFallback>{friend.name[0]}</AvatarFallback>
-              </Avatar>
-            ))}
-          </div>
-          <span className="text-sm text-muted-foreground">8 friends</span>
-        </div>
-      </div>
-      <div>
-        <h3 className="text-lg font-medium mb-4">Buy</h3>
-        <Carousel className="w-full">
-          <CarouselContent>
-            {buyOptions.map((option, index) => (
-              <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                <div className="p-1">
-                  <Card className="overflow-hidden">
-                    <CardContent className="p-0">
-                      <Image 
-                        src={option.image} 
-                        alt={option.title} 
-                        height={80}
-                        width={160}
-                        className="w-full h-20 object-cover" 
-                      />
-                      <div className="p-4">
-                        <h4 className="font-semibold text-sm mb-1">{option.title}</h4>
-                        <p className="text-muted-foreground text-xs mb-2">{option.price > 0 ? `฿${option.price}` : 'Various prices'}</p>
-                        <Button size="sm" className="w-full bg-purple-100 text-purple-500 hover:bg-purple-200 hover:text-purple-600">
-                          Buy
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
-        </Carousel>
-      </div>
     </div>
   )
+}
 
-  const HistoryView = () => (
+const HistoryView = ({ transactions }: { transactions: Transaction[] }) => {
+  return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4">
         <Card>
@@ -199,41 +225,6 @@ export function WalletInterface() {
           </div>
         </ScrollArea>
       </div>
-    </div>
-  )
-
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="min-h-screen flex flex-col">
-        <Card className="flex-1">
-          <CardContent className="p-6">
-            <div className="flex justify-center mb-6">
-              <Image 
-                src="/placeholder.png" 
-                alt="Company Logo" 
-                height={40} 
-                width={120} 
-              />
-            </div>
-            <TabsContent value="home">
-              <HomeView />
-            </TabsContent>
-            <TabsContent value="history">
-              <HistoryView />
-            </TabsContent>
-          </CardContent>
-        </Card>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="home" className="py-2.5">
-            <Home className="w-5 h-5 mr-2" />
-            Home
-          </TabsTrigger>
-          <TabsTrigger value="history" className="py-2.5">
-            <Clock className="w-5 h-5 mr-2" />
-            History
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
     </div>
   )
 }

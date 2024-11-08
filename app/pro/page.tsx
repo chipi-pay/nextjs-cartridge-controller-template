@@ -1,6 +1,6 @@
 'use client'
-import { WalletInterface } from "@/components/wallet-interface"
+import { WalletPro } from "@/components/wallet-pro"
 
 export default function Pro() {
-  return <WalletInterface />
+  return <WalletPro />
 }
