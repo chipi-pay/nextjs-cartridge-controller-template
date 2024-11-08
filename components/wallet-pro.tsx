@@ -17,18 +17,19 @@ import { useWalletBalances } from "@/hooks/use-wallet-balances"
 import { USDC_CONTRACT, STRK_FARM_USDC_SENSEI, NIMBORA_STAKING_USDC } from "@/app/constants/contracts"
 import { connector } from "@/app/providers/StarknetProvider"
 import { ConnectWallet } from "@/app/components/ConnectWallet"
+import Link from "next/link"
 
 // Add these before the WalletPro component
 const friends = [
-  { id: 1, name: "Alex", image: "/placeholder.png?height=32&width=32" },
-  { id: 2, name: "Maria", image: "/placeholder.png?height=32&width=32" },
-  { id: 3, name: "John", image: "/placeholder.png?height=32&width=32" },
+  { id: 1, name: "Alex", image: "/avatar1.jpeg" },
+  { id: 2, name: "Maria", image: "/avatar2.jpeg" },
+  { id: 3, name: "John", image: "/avatar1.jpeg" },
 ]
 
 const buyOptions = [
-  { title: "Muay Thai class", image: "/placeholder.png?height=80&width=160", price: 500 },
-  { title: "5x5 tattoo", image: "/placeholder.png?height=80&width=160", price: 2000 },
-  { title: "Pad Thai", image: "/placeholder.png?height=80&width=160", price: 120 },
+  { title: "Muay Thai class", image: "/muaythai.jpeg", price: 500 },
+  { title: "5x5 tattoo", image: "/tattoo.jpeg", price: 2000 },
+  { title: "Pad Thai", image: "/padthai.webp", price: 120 },
   { title: "UFC fight", image: "/placeholder.png?height=80&width=160", price: 1500 },
   { title: "More", image: "/placeholder.png?height=80&width=160", price: 0 },
 ]
@@ -232,7 +233,7 @@ const HomeView = ({ showMessageAlert, setShowMessageAlert }: HomeViewProps) => {
     <div className="space-y-6">
       <div className="flex items-start gap-4 mb-6">
         <Avatar className="w-12 h-12 border-2 border-primary">
-          <AvatarImage src="/sherk.jpeg?height=48&width=48" alt="@wellsja" />
+          <AvatarImage src="/sherk.jpeg" alt="@wellsja" />
           <AvatarFallback>JW</AvatarFallback>
         </Avatar>
         <div className="flex-1">
@@ -256,9 +257,11 @@ const HomeView = ({ showMessageAlert, setShowMessageAlert }: HomeViewProps) => {
           </Button>
         </div>
         <div className="flex gap-2">
-          <Button size="icon" variant="ghost" onClick={() => window.location.href = "/"}>
-            <Plus className="w-4 h-4" />
-          </Button>
+          <Link href="/basic">
+            <Button size="icon" variant="ghost">
+              <Plus className="w-4 h-4" />
+            </Button>
+          </Link>
           <Button 
             size="icon" 
             variant="ghost"
