@@ -3,6 +3,9 @@ import { ConnectWallet } from "@/app/components/ConnectWallet";
 import { TransferEth } from "@/app/components/TransferEth";
 import { InvestUsdc } from "@/app/components/InvestUsdc";
 import { Balances } from "@/app/components/Balances";
+import { SendToUserName } from "@/app/components/SendToChipiUser";
+import { SendToWallet } from "@/app/components/SendToWallet";
+
 import { useAccount } from "@starknet-react/core";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -84,6 +87,8 @@ export default function Home() {
         )}
         <InvestUsdc />
         <TransferEth />
+        <SendToUserName />
+        <SendToWallet />
       </main>
     </div>
   );
