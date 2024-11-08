@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useAccount } from "@starknet-react/core"
 import { ConnectWallet } from "@/app/components/ConnectWallet"
 import { ArrowUp, Copy, Home, Clock, MessageCircle, Plus, Gift } from "lucide-react"
@@ -13,6 +13,9 @@ import Image from "next/image"
 import { Toaster } from "@/components/ui/toaster"
 import { useWalletBalances } from "@/hooks/use-wallet-balances"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { USDC_CONTRACT, STRK_FARM_USDC_SENSEI, NIMBORA_STAKING_USDC } from "@/app/constants/contracts"
+import Link from "next/link"
+import { connector } from "@/app/providers/StarknetProvider"
 
 type Transaction = {
   emoji: string
@@ -21,6 +24,7 @@ type Transaction = {
   date: string
   friend: string
 }
+
 
 export function WalletInterface() {
   const [activeTab, setActiveTab] = useState("home")
@@ -49,7 +53,7 @@ export function WalletInterface() {
   }
 
   const transactions = [
-    { emoji: "🎉", category: "Chipi Feria", amount: 100.00, date: "Today", friend: "@dylankugler" },
+    { emoji: "🎉", category: "Chipi cards", amount: 100.00, date: "Today", friend: "@dylankugler" },
     { emoji: "🍜", category: "Food", amount: -25.50, date: "Yesterday", friend: "@chirry18" },
     { emoji: "💼", category: "Salary", amount: 2000.00, date: "Nov 5", friend: "@espejelomar" },
     { emoji: "🚕", category: "Transport", amount: -15.75, date: "Nov 4", friend: "@annabel" },
@@ -97,6 +101,14 @@ const HomeView = () => {
   const { balances } = useWalletBalances()
   const { account } = useAccount()
   const { toast } = useToast()
+  const [username, setUsername] = useState<string>()
+  const [showMessageAlert, setShowMessageAlert] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+
+  useEffect(() => {
+    if (!account?.address) return
+    connector.username()?.then((n) => setUsername(n))
+  }, [account?.address])
 
   const copyAddress = () => {
     if (account?.address) {
@@ -105,6 +117,100 @@ const HomeView = () => {
         title: "Address copied!",
         description: "The wallet address has been copied to your clipboard.",
       })
+    }
+  }
+
+  const handleInvest = async () => {
+    const amount = BigInt(2000000) // Convert number to BigInt
+
+    if (!account) {
+      toast({
+        title: "Wallet not connected",
+        description: "Please connect your wallet first.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (balances.eth < 0.01) {
+      toast({
+        title: "Insufficient ETH",
+        description: "Run out of gas. Send us a message",
+        variant: "destructive",
+      })
+      setShowMessageAlert(true)
+      setTimeout(() => setShowMessageAlert(false), 3000)
+      return
+    }
+
+    if (balances.cashBalance < 0.04) {
+      toast({
+        title: "Insufficient balance",
+        description: "Not enough to invest. Buy more Feria Cards.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setSubmitted(true)
+
+    try {
+      if (balances && balances.usdc >= 2) {
+        // Nimbora staking
+        await account.execute([
+          {
+            contractAddress: USDC_CONTRACT,
+            entrypoint: "approve",
+            calldata: [NIMBORA_STAKING_USDC, amount],
+          },
+          {
+            contractAddress: NIMBORA_STAKING_USDC,
+            entrypoint: "deposit",
+            calldata: [amount, account.address, "0x02aC4A10e11A9DbcDE67cEE0539Ca54aB3c1188C06E3BCa750b0378765b47709"],
+          },
+        ])
+        toast({
+          title: "Investment submitted",
+          description: "Your USDC has been invested in Nimbora.",
+        })
+      } else {
+        // STRK Farm
+        await account.execute([
+          {
+            contractAddress: USDC_CONTRACT,
+            entrypoint: "approve",
+            calldata: [STRK_FARM_USDC_SENSEI, amount],
+          },
+          {
+            contractAddress: STRK_FARM_USDC_SENSEI,
+            entrypoint: "deposit",
+            calldata: [amount, account.address],
+          },
+        ])
+        toast({
+          title: "Investment submitted",
+          description: "Your USDC has been invested in STRK Farm.",
+        })
+      }
+    } catch (error: unknown) {
+      console.error(error)
+      if (error instanceof Error && (error.message?.includes('gas') || error.message?.includes('fee'))) {
+        toast({
+          title: "Insufficient gas",
+          description: "Run out of gas. Send us a message",
+          variant: "destructive",
+        })
+        setShowMessageAlert(true)
+        setTimeout(() => setShowMessageAlert(false), 3000)
+      } else {
+        toast({
+          title: "Investment failed",
+          description: "There was an error processing your investment.",
+          variant: "destructive",
+        })
+      }
+    } finally {
+      setSubmitted(false)
     }
   }
 
@@ -118,7 +224,7 @@ const HomeView = () => {
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-semibold">
-              {account ? `${account.address.slice(0, 6)}...${account.address.slice(-4)}` : 'Connect Wallet'}
+              {username || 'Wallet User'}
             </h2>
           </div>
           <Button 
@@ -133,11 +239,30 @@ const HomeView = () => {
           </Button>
         </div>
         <div className="flex gap-2">
-          <Button size="icon" variant="ghost">
-            <Plus className="w-4 h-4" />
-          </Button>
-          <Button size="icon" variant="ghost">
-            <MessageCircle className="w-4 h-4" />
+          <Link href="/pro">
+            <Button 
+              size="icon" 
+              variant="ghost"
+              className="bg-purple-100 text-purple-500 hover:bg-purple-200 hover:text-purple-600"
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
+          </Link>
+          <Button 
+            size="icon" 
+            variant="ghost"
+            className={`relative bg-purple-100 text-purple-500 hover:bg-purple-200 hover:text-purple-600 ${
+              showMessageAlert ? 'animate-bounce' : ''
+            }`}
+          >
+            <MessageCircle 
+              className={`w-4 h-4 transition-colors duration-300 ${
+                showMessageAlert ? 'text-red-500' : ''
+              }`} 
+            />
+            {showMessageAlert && (
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-ping" />
+            )}
           </Button>
         </div>
       </div>
@@ -159,7 +284,11 @@ const HomeView = () => {
             <Button 
               variant="outline" 
               size="sm" 
-              className="mt-auto bg-purple-100 text-purple-500 hover:bg-purple-200 hover:text-purple-600"
+              className={`mt-auto ${
+                submitted ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-purple-100 text-purple-500 hover:bg-purple-200 hover:text-purple-600"
+              }`}
+              onClick={handleInvest}
+              disabled={submitted}
             >
               Invest More
             </Button>
@@ -167,11 +296,19 @@ const HomeView = () => {
         </Card>
       </div>
       <div className="grid grid-cols-2 gap-4">
-        <Button className="h-14 text-lg font-medium" variant="outline" onClick={() => console.log("Send clicked")}>
+        <Button 
+          className="h-14 text-lg font-medium bg-purple-100 text-purple-500 hover:bg-purple-200 hover:text-purple-600" 
+          variant="outline" 
+          onClick={() => console.log("Send clicked")}
+        >
           <ArrowUp className="w-5 h-5 mr-2" />
           Send
         </Button>
-        <Button className="h-14 text-lg font-medium" variant="outline" onClick={() => console.log("Redeem clicked")}>
+        <Button 
+          className="h-14 text-lg font-medium bg-purple-100 text-purple-500 hover:bg-purple-200 hover:text-purple-600" 
+          variant="outline" 
+          onClick={() => console.log("Redeem clicked")}
+        >
           <Gift className="w-5 h-5 mr-2" />
           Redeem
         </Button>
