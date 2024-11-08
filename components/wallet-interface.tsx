@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { USDC_CONTRACT, STRK_FARM_USDC_SENSEI, NIMBORA_STAKING_USDC } from "@/app/constants/contracts"
 import Link from "next/link"
 import { connector } from "@/app/providers/StarknetProvider"
+import { motion } from "framer-motion"
 
 type Transaction = {
   emoji: string
@@ -104,19 +105,51 @@ const HomeView = () => {
   const [username, setUsername] = useState<string>()
   const [showMessageAlert, setShowMessageAlert] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [particles, setParticles] = useState<Array<{
+    id: number;
+    x: number;
+    y: number;
+  }>>([])
 
   useEffect(() => {
     if (!account?.address) return
     connector.username()?.then((n) => setUsername(n))
   }, [account?.address])
 
+  useEffect(() => {
+    if (balances.investedBalance <= 0) return;
+
+    const interval = setInterval(() => {
+      const newParticle = {
+        id: Date.now(),
+        x: Math.random() * 100,
+        y: 0,
+      };
+      
+      setParticles(prev => [...prev, newParticle]);
+
+      // Clean up old particles after 2 seconds (matching animation duration)
+      setTimeout(() => {
+        setParticles(prev => prev.filter(p => p.id !== newParticle.id));
+      }, 2000);
+    }, 500); // Reduced frequency to every 500ms
+
+    return () => clearInterval(interval);
+  }, [balances.investedBalance]);
+
+  useEffect(() => {
+    console.log('🎨 Current particles:', particles.length);
+  }, [particles]);
+
   const copyAddress = () => {
     if (account?.address) {
-      navigator.clipboard.writeText(account.address)
+      // Pad the address to 66 characters (including 0x)
+      const paddedAddress = '0x' + account.address.slice(2).padStart(64, '0');
+      navigator.clipboard.writeText(paddedAddress);
       toast({
         title: "Address copied!",
         description: "The wallet address has been copied to your clipboard.",
-      })
+      });
     }
   }
 
@@ -132,7 +165,7 @@ const HomeView = () => {
       return
     }
 
-    if (balances.eth < 0.01) {
+    if (balances.eth < 0.0001) {
       toast({
         title: "Insufficient ETH",
         description: "Run out of gas. Send us a message",
@@ -277,14 +310,14 @@ const HomeView = () => {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="relative overflow-hidden h-[200px]">
           <CardContent className="pt-6 flex flex-col h-full">
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Invested Balance</h3>
-            <p className="text-2xl font-bold mb-4">${balances.investedBalance.toFixed(2)}</p>
+            <p className="text-2xl font-bold mb-4 relative z-10">${balances.investedBalance.toFixed(2)}</p>
             <Button 
               variant="outline" 
               size="sm" 
-              className={`mt-auto ${
+              className={`mt-auto relative z-10 ${
                 submitted ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-purple-100 text-purple-500 hover:bg-purple-200 hover:text-purple-600"
               }`}
               onClick={handleInvest}
@@ -292,6 +325,22 @@ const HomeView = () => {
             >
               Invest More
             </Button>
+
+            {particles.map(particle => (
+              <motion.div
+                key={particle.id}
+                className="absolute text-green-500 font-bold text-3xl opacity-30"
+                style={{
+                  left: `${particle.x}%`,
+                  bottom: '0px',
+                }}
+                initial={{ y: 0 }}
+                animate={{ y: -200 }}
+                transition={{ duration: 2, ease: "easeOut" }}
+              >
+                $
+              </motion.div>
+            ))}
           </CardContent>
         </Card>
       </div>

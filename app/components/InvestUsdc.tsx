@@ -23,7 +23,7 @@ export const InvestUsdc = () => {
             setSubmitted(true);
             setTxnHash(undefined);
 
-            if(data && Number(data.formatted) >= 2) {
+            if(data && Number(data.formatted) <= 1) {
                 account
                 .execute([
                     {
