@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useAccount } from "@starknet-react/core"
 import { ArrowUp, Copy, Home, Clock, MessageCircle, Plus, Gift } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -11,70 +12,266 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import Image from "next/image"
+import { Toaster } from "@/components/ui/toaster"
+import { useWalletBalances } from "@/hooks/use-wallet-balances"
+import { USDC_CONTRACT, STRK_FARM_USDC_SENSEI, NIMBORA_STAKING_USDC } from "@/app/constants/contracts"
+import { connector } from "@/app/providers/StarknetProvider"
+import { ConnectWallet } from "@/app/components/ConnectWallet"
+
+// Add these before the WalletPro component
+const friends = [
+  { id: 1, name: "Alex", image: "/placeholder.png?height=32&width=32" },
+  { id: 2, name: "Maria", image: "/placeholder.png?height=32&width=32" },
+  { id: 3, name: "John", image: "/placeholder.png?height=32&width=32" },
+]
+
+const buyOptions = [
+  { title: "Muay Thai class", image: "/placeholder.png?height=80&width=160", price: 500 },
+  { title: "5x5 tattoo", image: "/placeholder.png?height=80&width=160", price: 2000 },
+  { title: "Pad Thai", image: "/placeholder.png?height=80&width=160", price: 120 },
+  { title: "UFC fight", image: "/placeholder.png?height=80&width=160", price: 1500 },
+  { title: "More", image: "/placeholder.png?height=80&width=160", price: 0 },
+]
+
+const transactions = [
+  { emoji: "🎉", category: "Chipi Feria", amount: 100.00, date: "Today", friend: "@dylankugler" },
+  { emoji: "🍜", category: "Food", amount: -25.50, date: "Yesterday", friend: "@chirry18" },
+  { emoji: "💼", category: "Salary", amount: 2000.00, date: "Nov 5", friend: "@espejelomar" },
+  { emoji: "🚕", category: "Transport", amount: -15.75, date: "Nov 4", friend: "@annabel" },
+  { emoji: "🎁", category: "Gift", amount: 50.00, date: "Nov 3", friend: "@haycarlitos" },
+  { emoji: "📚", category: "Education", amount: -100.00, date: "Nov 2", friend: "@0xvato" },
+  { emoji: "🏋️", category: "Gym", amount: -30.00, date: "Nov 1", friend: "@carldlfr" },
+]
 
 export function WalletPro() {
   const [activeTab, setActiveTab] = useState("home")
-  const { toast } = useToast()
+  const { account } = useAccount()
+  const [showMessageAlert, setShowMessageAlert] = useState(false)
 
-  const copyAddress = () => {
-    navigator.clipboard.writeText("0x1234...5678")
-    toast({
-      title: "Address copied!",
-      description: "The wallet address has been copied to your clipboard.",
-    })
+  // If not connected, show connect wallet screen
+  if (!account) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex flex-col items-center justify-center p-6">
+        <div className="mb-8">
+          <Image 
+            src="/chipi.png" 
+            alt="Company Logo" 
+            height={40} 
+            width={120} 
+          />
+        </div>
+        <Card className="w-full max-w-md">
+          <CardContent className="p-6 text-center">
+            <h2 className="text-xl font-semibold mb-4">Connect Your Wallet</h2>
+            <ConnectWallet />
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
-  const friends = [
-    { id: 1, name: "Alex", image: "/placeholder.png?height=32&width=32" },
-    { id: 2, name: "Maria", image: "/placeholder.png?height=32&width=32" },
-    { id: 3, name: "John", image: "/placeholder.png?height=32&width=32" },
-  ]
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+      <Toaster />
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="min-h-screen flex flex-col">
+        <Card className="flex-1">
+          <CardContent className="p-6">
+            <div className="flex justify-center mb-6">
+              <Image 
+                src="/chipi.png" 
+                alt="Company Logo" 
+                height={40} 
+                width={120} 
+              />
+            </div>
+            <TabsContent value="home">
+              <HomeView showMessageAlert={showMessageAlert} setShowMessageAlert={setShowMessageAlert} />
+            </TabsContent>
+            <TabsContent value="history">
+              <HistoryView />
+            </TabsContent>
+          </CardContent>
+        </Card>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="home" className="py-2.5">
+            <Home className="w-5 h-5 mr-2" />
+            Home
+          </TabsTrigger>
+          <TabsTrigger value="history" className="py-2.5">
+            <Clock className="w-5 h-5 mr-2" />
+            History
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+    </div>
+  )
+}
 
-  const buyOptions = [
-    { title: "Muay Thai class", image: "/placeholder.png?height=80&width=160", price: 500 },
-    { title: "5x5 tattoo", image: "/placeholder.png?height=80&width=160", price: 2000 },
-    { title: "Pad Thai", image: "/placeholder.png?height=80&width=160", price: 120 },
-    { title: "UFC fight", image: "/placeholder.png?height=80&width=160", price: 1500 },
-    { title: "More", image: "/placeholder.png?height=80&width=160", price: 0 },
-  ]
+type HomeViewProps = {
+  showMessageAlert: boolean;
+  setShowMessageAlert: (show: boolean) => void;
+}
 
-  const transactions = [
-    { emoji: "🎉", category: "Chipi Feria", amount: 100.00, date: "Today", friend: "@dylankugler" },
-    { emoji: "🍜", category: "Food", amount: -25.50, date: "Yesterday", friend: "@chirry18" },
-    { emoji: "💼", category: "Salary", amount: 2000.00, date: "Nov 5", friend: "@espejelomar" },
-    { emoji: "🚕", category: "Transport", amount: -15.75, date: "Nov 4", friend: "@annabel" },
-    { emoji: "🎁", category: "Gift", amount: 50.00, date: "Nov 3", friend: "@haycarlitos" },
-    { emoji: "📚", category: "Education", amount: -100.00, date: "Nov 2", friend: "@0xvato" },
-    { emoji: "🏋️", category: "Gym", amount: -30.00, date: "Nov 1", friend: "@carldlfr" },
-  ]
+const HomeView = ({ showMessageAlert, setShowMessageAlert }: HomeViewProps) => {
+  const { balances } = useWalletBalances()
+  const { account } = useAccount()
+  const { toast } = useToast()
+  const [username, setUsername] = useState<string>()
+  const [submitted, setSubmitted] = useState(false)
 
+  useEffect(() => {
+    if (!account?.address) return
+    connector.username()?.then((n) => setUsername(n))
+  }, [account?.address])
 
+  const copyAddress = () => {
+    if (account?.address) {
+      navigator.clipboard.writeText(account.address)
+      toast({
+        title: "Address copied!",
+        description: "The wallet address has been copied to your clipboard.",
+      })
+    }
+  }
 
-  const HomeView = () => (
+  const handleInvest = async () => {
+    const amount = BigInt(2000000)
+
+    if (!account) {
+      toast({
+        title: "Wallet not connected",
+        description: "Please connect your wallet first.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (balances.eth < 0.01) {
+      toast({
+        title: "Insufficient ETH",
+        description: "Run out of gas. Send us a message",
+        variant: "destructive",
+      })
+      setShowMessageAlert(true)
+      setTimeout(() => setShowMessageAlert(false), 3000)
+      return
+    }
+
+    if (balances.cashBalance < 0.04) {
+      toast({
+        title: "Insufficient balance",
+        description: "Not enough to invest. Buy more Feria Cards.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setSubmitted(true)
+
+    try {
+      if (balances && balances.usdc >= 2) {
+        // Nimbora staking
+        await account.execute([
+          {
+            contractAddress: USDC_CONTRACT,
+            entrypoint: "approve",
+            calldata: [NIMBORA_STAKING_USDC, amount],
+          },
+          {
+            contractAddress: NIMBORA_STAKING_USDC,
+            entrypoint: "deposit",
+            calldata: [amount, account.address, "0x02aC4A10e11A9DbcDE67cEE0539Ca54aB3c1188C06E3BCa750b0378765b47709"],
+          },
+        ])
+        toast({
+          title: "Investment submitted",
+          description: "Your USDC has been invested in Nimbora.",
+        })
+      } else {
+        // STRK Farm
+        await account.execute([
+          {
+            contractAddress: USDC_CONTRACT,
+            entrypoint: "approve",
+            calldata: [STRK_FARM_USDC_SENSEI, amount],
+          },
+          {
+            contractAddress: STRK_FARM_USDC_SENSEI,
+            entrypoint: "deposit",
+            calldata: [amount, account.address],
+          },
+        ])
+        toast({
+          title: "Investment submitted",
+          description: "Your USDC has been invested in STRK Farm.",
+        })
+      }
+    } catch (error: unknown) {
+      console.error(error)
+      if (error instanceof Error && (error.message?.includes('gas') || error.message?.includes('fee'))) {
+        toast({
+          title: "Insufficient gas",
+          description: "Run out of gas. Send us a message",
+          variant: "destructive",
+        })
+        setShowMessageAlert(true)
+        setTimeout(() => setShowMessageAlert(false), 3000)
+      } else {
+        toast({
+          title: "Investment failed",
+          description: "There was an error processing your investment.",
+          variant: "destructive",
+        })
+      }
+    } finally {
+      setSubmitted(false)
+    }
+  }
+
+  return (
     <div className="space-y-6">
       <div className="flex items-start gap-4 mb-6">
         <Avatar className="w-12 h-12 border-2 border-primary">
-          <AvatarImage src="/placeholder.png?height=48&width=48" alt="@wellsja" />
+          <AvatarImage src="/sherk.jpeg?height=48&width=48" alt="@wellsja" />
           <AvatarFallback>JW</AvatarFallback>
         </Avatar>
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-semibold">Jaboris Wells</h2>
+            <h2 className="text-xl font-semibold">
+              {username || 'Wallet User'}
+            </h2>
             <Badge variant="secondary" className="bg-pink-100 text-pink-500 hover:bg-pink-100">
               Pro
             </Badge>
           </div>
-          <Button variant="ghost" size="sm" onClick={copyAddress} className="p-0 h-auto font-normal text-muted-foreground">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={copyAddress} 
+            className="p-0 h-auto font-normal text-muted-foreground"
+            disabled={!account}
+          >
             <Copy className="w-3 h-3 mr-1" />
-            0x1234...5678
+            {account ? `${account.address.slice(0, 6)}...${account.address.slice(-4)}` : '0x0000...0000'}
           </Button>
         </div>
         <div className="flex gap-2">
-          <Button size="icon" variant="ghost">
+          <Button size="icon" variant="ghost" onClick={() => window.location.href = "/"}>
             <Plus className="w-4 h-4" />
           </Button>
-          <Button size="icon" variant="ghost">
-            <MessageCircle className="w-4 h-4" />
+          <Button 
+            size="icon" 
+            variant="ghost"
+            className={`relative ${showMessageAlert ? 'animate-bounce' : ''}`}
+          >
+            <MessageCircle 
+              className={`w-4 h-4 transition-colors duration-300 ${
+                showMessageAlert ? 'text-red-500' : ''
+              }`} 
+            />
+            {showMessageAlert && (
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-ping" />
+            )}
           </Button>
         </div>
       </div>
@@ -82,15 +279,27 @@ export function WalletPro() {
         <Card>
           <CardContent className="pt-6">
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Cash Balance</h3>
-            <p className="text-2xl font-bold">$1,234.56</p>
+            <p className="text-2xl font-bold">${balances.cashBalance.toFixed(2)}</p>
+            <div className="mt-2 text-sm text-muted-foreground">
+              <div>ETH: {balances.eth.toFixed(4)}</div>
+              <div>USDC: ${balances.usdc.toFixed(2)}</div>
+            </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6 flex flex-col h-full">
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Invested Balance</h3>
-            <p className="text-2xl font-bold mb-4">$5,678.90</p>
-            <Button variant="outline" size="sm" className="mt-auto bg-purple-100 text-purple-500 hover:bg-purple-200 hover:text-purple-600">
-               Invest
+            <p className="text-2xl font-bold mb-4">${balances.investedBalance.toFixed(2)}</p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className={`mt-auto ${
+                submitted ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-purple-100 text-purple-500 hover:bg-purple-200 hover:text-purple-600"
+              }`}
+              onClick={handleInvest}
+              disabled={submitted}
+            >
+              Invest More
             </Button>
           </CardContent>
         </Card>
@@ -154,86 +363,51 @@ export function WalletPro() {
       </div>
     </div>
   )
+}
 
-  const HistoryView = () => (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <h3 className="text-sm font-medium text-muted-foreground mb-2">Earnings</h3>
-            <p className="text-xl font-bold">$2,150.00</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <h3 className="text-sm font-medium text-muted-foreground mb-2">Spendings</h3>
-            <p className="text-xl font-bold">$171.25</p>
-          </CardContent>
-        </Card>
+const HistoryView = () => (
+  <div className="space-y-6">
+    <div className="grid grid-cols-2 gap-4">
+      <Card>
+        <CardContent className="pt-6">
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">Earnings</h3>
+          <p className="text-xl font-bold">$2,150.00</p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent className="pt-6">
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">Spendings</h3>
+          <p className="text-xl font-bold">$171.25</p>
+        </CardContent>
+      </Card>
+    </div>
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-lg font-medium">Transactions</h3>
+        <span className="text-sm text-muted-foreground">116 transactions</span>
       </div>
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-lg font-medium">Transactions</h3>
-          <span className="text-sm text-muted-foreground">116 transactions</span>
-        </div>
-        <ScrollArea className="h-[400px]">
-          <div className="space-y-2">
-            {transactions.map((transaction, i) => (
-              <div key={i} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{transaction.emoji}</span>
-                  <div>
-                    <p className="font-medium">{transaction.category}</p>
-                    <div className="flex items-center gap-1">
-                      <p className="text-sm text-muted-foreground">{transaction.date}</p>
-                      <span className="text-muted-foreground">•</span>
-                      <p className="text-sm text-muted-foreground">{transaction.friend}</p>
-                    </div>
+      <ScrollArea className="h-[400px]">
+        <div className="space-y-2">
+          {transactions.map((transaction, i) => (
+            <div key={i} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">{transaction.emoji}</span>
+                <div>
+                  <p className="font-medium">{transaction.category}</p>
+                  <div className="flex items-center gap-1">
+                    <p className="text-sm text-muted-foreground">{transaction.date}</p>
+                    <span className="text-muted-foreground">•</span>
+                    <p className="text-sm text-muted-foreground">{transaction.friend}</p>
                   </div>
                 </div>
-                <span className={transaction.amount > 0 ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
-                  {transaction.amount > 0 ? "+" : "-"}${Math.abs(transaction.amount).toFixed(2)}
-                </span>
               </div>
-            ))}
-          </div>
-        </ScrollArea>
-      </div>
-    </div>
-  )
-
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="min-h-screen flex flex-col">
-        <Card className="flex-1">
-          <CardContent className="p-6">
-            <div className="flex justify-center mb-6">
-              <Image 
-                src="/placeholder.png" 
-                alt="Company Logo" 
-                height={40} 
-                width={120} 
-              />
+              <span className={transaction.amount > 0 ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                {transaction.amount > 0 ? "+" : "-"}${Math.abs(transaction.amount).toFixed(2)}
+              </span>
             </div>
-            <TabsContent value="home">
-              <HomeView />
-            </TabsContent>
-            <TabsContent value="history">
-              <HistoryView />
-            </TabsContent>
-          </CardContent>
-        </Card>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="home" className="py-2.5">
-            <Home className="w-5 h-5 mr-2" />
-            Home
-          </TabsTrigger>
-          <TabsTrigger value="history" className="py-2.5">
-            <Clock className="w-5 h-5 mr-2" />
-            History
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+          ))}
+        </div>
+      </ScrollArea>
     </div>
-  )
-}
+  </div>
+)

@@ -242,16 +242,16 @@ const HomeView = () => {
           <Link href="/pro">
             <Button 
               size="icon" 
-              variant="ghost"
-              className="bg-purple-100 text-purple-500 hover:bg-purple-200 hover:text-purple-600"
+              variant="outline"
+              className="h-8 w-8"
             >
               <Plus className="w-4 h-4" />
             </Button>
           </Link>
           <Button 
             size="icon" 
-            variant="ghost"
-            className={`relative bg-purple-100 text-purple-500 hover:bg-purple-200 hover:text-purple-600 ${
+            variant="outline"
+            className={`relative h-8 w-8 ${
               showMessageAlert ? 'animate-bounce' : ''
             }`}
           >
@@ -297,7 +297,7 @@ const HomeView = () => {
       </div>
       <div className="grid grid-cols-2 gap-4">
         <Button 
-          className="h-14 text-lg font-medium bg-purple-100 text-purple-500 hover:bg-purple-200 hover:text-purple-600" 
+          className="h-14 text-lg font-medium" 
           variant="outline" 
           onClick={() => console.log("Send clicked")}
         >
@@ -305,7 +305,7 @@ const HomeView = () => {
           Send
         </Button>
         <Button 
-          className="h-14 text-lg font-medium bg-purple-100 text-purple-500 hover:bg-purple-200 hover:text-purple-600" 
+          className="h-14 text-lg font-medium" 
           variant="outline" 
           onClick={() => console.log("Redeem clicked")}
         >
