@@ -2,7 +2,7 @@
 import { useAccount, useExplorer, useBalance } from "@starknet-react/core";
 import { cairo, Uint256 } from "starknet";
 import { useCallback, useState } from "react";
-import { STARKNET_BROTHER_TOKEN, ETH_CONTRACT } from "@/app/constants/contracts";
+import { ETH_CONTRACT } from "@/app/constants/contracts";
 
 
 export const SendToUserName = () => {
