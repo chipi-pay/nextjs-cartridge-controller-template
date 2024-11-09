@@ -1,66 +1,85 @@
-'use client'
+"use client";
 
-import { useState, useRef, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
-import { useToast } from "@/hooks/use-toast"
-import Confetti from 'react-confetti'
+import { useState, useRef, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import Confetti from "react-confetti";
+import { useRedeemFeriaCard } from "@/features/feria/hooks/useRedeemFeriaCard";
+import { useAccount } from "@starknet-react/core";
+import { ChainEnum, CoinEnum } from "@prisma/client";
 
 interface RedeemProps {
-  onBack?: () => void
+  onBack?: () => void;
 }
 
 export function Redeem({ onBack = () => {} }: RedeemProps) {
-  const [code, setCode] = useState("")
-  const [showConfetti, setShowConfetti] = useState(false)
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
-  const cardRef = useRef<HTMLDivElement>(null)
-  const { toast } = useToast()
+  const [code, setCode] = useState("");
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const cardRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+  const { account } = useAccount();
+  const { mutate: redeemFeriaCard, isPending: isRedeemingFeriaCard } =
+    useRedeemFeriaCard();
 
   // Update dimensions when component mounts
   useEffect(() => {
     if (cardRef.current) {
       setDimensions({
         width: cardRef.current.offsetWidth,
-        height: cardRef.current.offsetHeight
-      })
+        height: cardRef.current.offsetHeight,
+      });
     }
-  }, [])
-
-  // Hardcoded valid code for testing
-  const VALID_CODE = "CHIPI123"
+  }, []);
 
   const handleRedeem = async () => {
+    console.log("Redeeming feria card...", code);
     if (!code) {
       toast({
         title: "Error",
         description: "Please enter a code",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    // Simulate API call with hardcoded validation
-    if (code === VALID_CODE) {
-      setShowConfetti(true)
-      toast({
-        title: "Success!",
-        description: "Code redeemed successfully",
-      })
-      // Hide confetti after 5 seconds
-      setTimeout(() => setShowConfetti(false), 5000)
-    } else {
-      toast({
-        title: "Error",
-        description: "Invalid code",
-        variant: "destructive",
-      })
-    }
-  }
+    redeemFeriaCard(
+      {
+        cardCode: code,
+        redeemedWallet: account?.address as string,
+        redeemedChain: ChainEnum.STARKNET,
+        redeemedCoin: CoinEnum.USDC,
+      },
+      {
+        onSuccess: (data) => {
+          setShowConfetti(true);
+          toast({
+            title: "Redeem successful!",
+            description: `Code ${data.cardCode} redeemed successfully`,
+          });
+          setTimeout(() => {
+            setShowConfetti(false);
+          }, 5000);
+        },
+        onError: (error) => {
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : "Failed to process rewards. Please try again later.";
+          toast({
+            title: "Redeem failed",
+            description: errorMessage,
+            variant: "destructive",
+          });
+        },
+      },
+    );
+  };
 
   return (
-    <Card className="relative overflow-hidden h-[200px]" ref={cardRef}>
+    <Card className="relative h-[200px] overflow-hidden" ref={cardRef}>
       {showConfetti && (
         <div className="absolute inset-0">
           <Confetti
@@ -71,28 +90,33 @@ export function Redeem({ onBack = () => {} }: RedeemProps) {
           />
         </div>
       )}
-      <CardContent className="pt-6 flex flex-col h-full">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="text-sm font-medium text-muted-foreground">Redeem Code</h3>
-          <Button variant="ghost" size="sm" onClick={onBack}>Back</Button>
+      <CardContent className="flex h-full flex-col pt-6">
+        <div className="mb-2 flex items-center justify-between">
+          <h3 className="text-sm font-medium text-muted-foreground">
+            Redeem Code
+          </h3>
+          <Button variant="ghost" size="sm" onClick={onBack}>
+            Back
+          </Button>
         </div>
-        <div className="space-y-4 flex-1">
+        <div className="flex-1 space-y-4">
           <Input
             placeholder="Enter your code"
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            className="bg-transparent border-muted"
+            className="border-muted bg-transparent"
           />
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             className="w-full bg-purple-100 text-purple-500 hover:bg-purple-200 hover:text-purple-600"
             onClick={handleRedeem}
+            disabled={isRedeemingFeriaCard}
           >
             Redeem
           </Button>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

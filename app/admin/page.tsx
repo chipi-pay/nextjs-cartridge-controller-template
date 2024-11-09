@@ -15,7 +15,11 @@ export default function AdminPage() {
         disabled={isPending}
         className="rounded-md bg-blue-500 p-2 text-white"
         onClick={() =>
-          createFeriaCard({ cardCode: "mamitas", amount: 100, name: "Mamitas" })
+          createFeriaCard({
+            cardCode: "chipilinos",
+            amount: 1,
+            name: "chipilinos",
+          })
         }
       >
         {isPending ? "Creating..." : "Create Feria Card"}
