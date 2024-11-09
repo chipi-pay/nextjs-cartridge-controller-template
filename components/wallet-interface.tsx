@@ -17,6 +17,8 @@ import { USDC_CONTRACT, STRK_FARM_USDC_SENSEI, NIMBORA_STAKING_USDC } from "@/ap
 import Link from "next/link"
 import { connector } from "@/app/providers/StarknetProvider"
 import { motion } from "framer-motion"
+import confetti from 'canvas-confetti';
+import { SendCash } from "@/components/send-cash"
 
 type Transaction = {
   emoji: string
@@ -110,11 +112,35 @@ const HomeView = () => {
     x: number;
     y: number;
   }>>([])
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [redeemMessage, setRedeemMessage] = useState<string>("");
+  const [userAddress, setUserAddress] = useState<string>();
+  const [normalizedUserAddress, setNormalizedUserAddress] = useState<string>();
+  const [showSendCard, setShowSendCard] = useState(false)
 
   useEffect(() => {
-    if (!account?.address) return
-    connector.username()?.then((n) => setUsername(n))
-  }, [account?.address])
+    if (!account?.address) return;
+    
+    connector.username()?.then((n) => setUsername(n));
+    
+    // Format and store the padded address
+    const cleanAddress = account.address.replace('0x', '');
+    const paddingNeeded = 64 - cleanAddress.length;
+    const paddedAddress = '0x' + '0'.repeat(paddingNeeded) + cleanAddress;
+    
+    // Set both addresses
+    setUserAddress(paddedAddress);
+    setNormalizedUserAddress(paddedAddress);
+    
+    // Debug log addresses
+    console.log('🔍 Addresses:', {
+      accountAddress: account.address,
+      cleanAddress,
+      paddingNeeded,
+      paddedAddress,
+      length: paddedAddress.length
+    });
+  }, [account?.address]);
 
   useEffect(() => {
     if (balances.investedBalance <= 0) return;
@@ -138,7 +164,6 @@ const HomeView = () => {
   }, [balances.investedBalance]);
 
   useEffect(() => {
-    console.log('🎨 Current particles:', particles.length);
   }, [particles]);
 
   const copyAddress = () => {
@@ -247,6 +272,81 @@ const HomeView = () => {
     }
   }
 
+  const handleRedeem = async () => {
+    if (!account || !userAddress || !normalizedUserAddress) return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    
+    if (!code) {
+      toast({
+        title: "No code found",
+        description: "Please use a valid redeem link",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      
+      const requestBody = {
+        code,
+        userAddress,
+        normalizedUserAddress
+      };
+      
+      // Debug log before sending request
+      console.log('🚀 Sending Request:', requestBody);
+
+      const response = await fetch(`/api?code=${code}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      const data = await response.json();
+      
+      // Debug response
+      console.log('📡 Response:', data);
+      
+      if (data.error) {
+        console.error('❌ Error:', data.error);
+        setRedeemMessage(data.error);
+        toast({
+          title: "Redeem failed",
+          description: data.error,
+          variant: "destructive",
+        });
+      } else if (data.message) {
+        console.log('✅ Success:', data);
+        setRedeemMessage(data.message);
+        toast({
+          title: "Redeem successful!",
+          description: data.message,
+        });
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
+    } catch (error) {
+      console.error('❌ Fetch error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process rewards. Please try again later.';
+      setRedeemMessage(errorMessage);
+      toast({
+        title: "Redeem failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-start gap-4 mb-6">
@@ -344,11 +444,18 @@ const HomeView = () => {
           </CardContent>
         </Card>
       </div>
+      {redeemMessage && (
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-center text-gray-700">{redeemMessage}</p>
+          </CardContent>
+        </Card>
+      )}
       <div className="grid grid-cols-2 gap-4">
         <Button 
           className="h-14 text-lg font-medium" 
           variant="outline" 
-          onClick={() => console.log("Send clicked")}
+          onClick={() => setShowSendCard(!showSendCard)}
         >
           <ArrowUp className="w-5 h-5 mr-2" />
           Send
@@ -356,12 +463,26 @@ const HomeView = () => {
         <Button 
           className="h-14 text-lg font-medium" 
           variant="outline" 
-          onClick={() => console.log("Redeem clicked")}
+          onClick={handleRedeem}
+          disabled={isProcessing}
         >
-          <Gift className="w-5 h-5 mr-2" />
-          Redeem
+          {isProcessing ? (
+            <span className="flex items-center">
+              <span className="animate-spin mr-2">⚡</span>
+              Processing...
+            </span>
+          ) : (
+            <>
+              <Gift className="w-5 h-5 mr-2" />
+              Redeem
+            </>
+          )}
         </Button>
       </div>
+
+      {showSendCard && (
+        <SendCash onBack={() => setShowSendCard(false)} />
+      )}
     </div>
   )
 }
