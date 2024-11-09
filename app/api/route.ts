@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { type NextRequest } from 'next/server';
 import dotenv from 'dotenv';
-import { Account,  cairo, RpcProvider, Contract } from 'starknet';
+import { Account, cairo, RpcProvider, Contract } from 'starknet';
 import { ETH_CONTRACT, USDC_CONTRACT } from '@/app/constants/contracts';
 import { ERC20 } from '../ABIs/erc20';
 
@@ -16,8 +16,8 @@ const VALID_CODES = {
 // Constants and provider setup
 const CHIPI_ADDRESS = process.env.CHIPI_PUBLIC_KEY;
 const CHIPI_PRIVATE_KEY = process.env.CHIPI_PRIVATE_KEY?.replace('0x00', '0x');
-
-const provider = new RpcProvider({ nodeUrl: 'https://starknet-mainnet.public.blastapi.io/rpc/v0_7' });
+const INFURA_PROJECT_ID = process.env.INFURA_PROJECT_ID;
+const provider = new RpcProvider({ nodeUrl: `https://starknet-mainnet.infura.io/v3/${INFURA_PROJECT_ID}` });
 
 export async function POST(request: NextRequest) {
   try {
@@ -79,14 +79,17 @@ export async function POST(request: NextRequest) {
     });
 
     const usdc = new Contract(ERC20, USDC_CONTRACT, provider);
-    usdc.connect(chipi_account);
+    
+   //  usdc.connect(chipi_account);
 
     const eth = new Contract(ERC20, ETH_CONTRACT, provider);
-
+    //eth.connect(chipi_account);
     // Then check balances
    const ethBalance = await eth.balanceOf(chipi_account.address);
+    console.log("ETH Balance", ethBalance);
 
     const usdcBalance = await usdc.balanceOf(chipi_account.address);
+    console.log("USDC Balance", usdcBalance);
 
     // Convert balance to numbers
     const ethBalanceNum = Number(BigInt(ethBalance));
@@ -103,21 +106,6 @@ export async function POST(request: NextRequest) {
     const multiCall = await chipi_account.execute([
         eth.populate('transfer', [userAddress, cairo.uint256(0.00002 * 10 ** 18)]),
         usdc.populate('transfer', [userAddress, cairo.uint256(5 * 10 ** 5)]),
-        /* contractAddress: eth.address,
-        entrypoint: 'transfer',
-        calldata: CallData.compile({
-          recipient: userAddress,
-          amount: cairo.uint256(0.00002 * 10 ** 18),
-        }), */
-      /* },
-      {
-        contractAddress: usdc.address,
-        entrypoint: 'transfer',
-        calldata: CallData.compile({
-          recipient: userAddress,
-          amount: cairo.uint256(1 * 10 ** 6),
-        }),
-      }, */
     ]);
 
     // Wait for confirmation
