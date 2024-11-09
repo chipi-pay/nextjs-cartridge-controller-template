@@ -19,6 +19,7 @@ import { connector } from "@/app/providers/StarknetProvider"
 import { motion } from "framer-motion"
 import confetti from 'canvas-confetti';
 import { SendCash } from "@/components/send-cash"
+import { Redeem } from "@/components/redeem"
 
 type Transaction = {
   emoji: string
@@ -117,6 +118,7 @@ const HomeView = () => {
   const [userAddress, setUserAddress] = useState<string>();
   const [normalizedUserAddress, setNormalizedUserAddress] = useState<string>();
   const [showSendCard, setShowSendCard] = useState(false)
+  const [showRedeemCard, setShowRedeemCard] = useState(false)
 
   useEffect(() => {
     if (!account?.address) return;
@@ -463,25 +465,19 @@ const HomeView = () => {
         <Button 
           className="h-14 text-lg font-medium" 
           variant="outline" 
-          onClick={handleRedeem}
-          disabled={isProcessing}
+          onClick={() => setShowRedeemCard(!showRedeemCard)}
         >
-          {isProcessing ? (
-            <span className="flex items-center">
-              <span className="animate-spin mr-2">⚡</span>
-              Processing...
-            </span>
-          ) : (
-            <>
-              <Gift className="w-5 h-5 mr-2" />
-              Redeem
-            </>
-          )}
+          <Gift className="w-5 h-5 mr-2" />
+          Redeem
         </Button>
       </div>
 
       {showSendCard && (
         <SendCash onBack={() => setShowSendCard(false)} />
+      )}
+
+      {showRedeemCard && (
+        <Redeem onBack={() => setShowRedeemCard(false)} />
       )}
     </div>
   )
