@@ -1,8 +1,7 @@
+import { Analytics } from '@vercel/analytics/react';
 import type { Metadata } from "next";
 import "./globals.css";
 import { StarknetProvider } from "@/app/providers/StarknetProvider";
-
-
 
 export const metadata: Metadata = {
   title: "Chipi Pay @ Starknet's HH Bangkok",
@@ -20,6 +19,7 @@ export default function RootLayout({
         <StarknetProvider>
           {children}
         </StarknetProvider>
+        <Analytics />
       </body>
     </html>
   )
