@@ -7,7 +7,7 @@ import { Analytics } from '@vercel/analytics/react';
 
 export const metadata: Metadata = {
   title: "Chipi Pay @ Starknet's HH Bangkok",
-  description: "Next.js Cartridge Controller template.",
+  description: "Onboard your friends in less than a minute.",
 };
 
 export default function RootLayout({
