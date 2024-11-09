@@ -1,6 +1,6 @@
 'use client'
-import { Send } from "@/components/send"
+import { Sender } from "@/components/send-cash"
 
 export default function Pro() {
-  return <Send />
+  return <Sender />
 }

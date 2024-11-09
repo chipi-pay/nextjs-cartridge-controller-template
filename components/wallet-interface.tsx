@@ -18,6 +18,7 @@ import Link from "next/link"
 import { connector } from "@/app/providers/StarknetProvider"
 import { motion } from "framer-motion"
 import confetti from 'canvas-confetti';
+import { SendCash } from "@/components/send-cash"
 
 type Transaction = {
   emoji: string
@@ -115,6 +116,7 @@ const HomeView = () => {
   const [redeemMessage, setRedeemMessage] = useState<string>("");
   const [userAddress, setUserAddress] = useState<string>();
   const [normalizedUserAddress, setNormalizedUserAddress] = useState<string>();
+  const [showSendCard, setShowSendCard] = useState(false)
 
   useEffect(() => {
     if (!account?.address) return;
@@ -162,7 +164,6 @@ const HomeView = () => {
   }, [balances.investedBalance]);
 
   useEffect(() => {
-    console.log('🎨 Current particles:', particles.length);
   }, [particles]);
 
   const copyAddress = () => {
@@ -456,7 +457,7 @@ const HomeView = () => {
         <Button 
           className="h-14 text-lg font-medium" 
           variant="outline" 
-          onClick={() => console.log("Send clicked")}
+          onClick={() => setShowSendCard(!showSendCard)}
         >
           <ArrowUp className="w-5 h-5 mr-2" />
           Send
@@ -480,6 +481,10 @@ const HomeView = () => {
           )}
         </Button>
       </div>
+
+      {showSendCard && (
+        <SendCash onBack={() => setShowSendCard(false)} />
+      )}
     </div>
   )
 }

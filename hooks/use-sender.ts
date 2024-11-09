@@ -10,11 +10,12 @@ export const useSendToUsername = () => {
     const [amount, setAmount] = useState<number>(0);
     const [username, setUsername] = useState<string>('');
     const [wallet, setWallet] = useState<string>('');
+    const [errorMessage, setError] = useState<string>();
 
     const { account } = useAccount();
     const explorer = useExplorer();
     
-    const { data: balance, error } = useBalance({
+    const { data: balance } = useBalance({
         address: account?.address as `0x${string}`,
         token: ETH_CONTRACT,
     });
@@ -31,24 +32,37 @@ export const useSendToUsername = () => {
 
     const execute = useCallback(
         async (amount: Uint256) => {
-            if (!account || error) return;
+            if (!account) {
+                setError("No account connected");
+                return;
+            }
+            if (!wallet) {
+                setError("Invalid username");
+                return;
+            }
             
             setSubmitted(true);
             setTxnHash(undefined);
+            setError(undefined);
 
-            if(balance && cairo.uint256(balance.value) >= amount) {
-                account
-                    .execute([{
+            try {
+                if(balance && cairo.uint256(balance.value) >= amount) {
+                    const result = await account.execute([{
                         contractAddress: ETH_CONTRACT,
                         entrypoint: "transfer",
                         calldata: [wallet, amount],
-                    }])
-                    .then(({ transaction_hash }) => setTxnHash(transaction_hash))
-                    .catch((e) => console.error(e))
-                    .finally(() => setSubmitted(false));
-            } 
+                    }]);
+                    setTxnHash(result.transaction_hash);
+                } else {
+                    setError("Insufficient balance");
+                }
+            } catch (e) {
+                setError(e instanceof Error ? e.message : "Transaction failed");
+            } finally {
+                setSubmitted(false);
+            }
         },
-        [account, balance, error, wallet]
+        [account, balance, wallet]
     );
 
     const setMaxAmount = () => {
@@ -66,7 +80,8 @@ export const useSendToUsername = () => {
         setAmount,
         handleUsername,
         execute,
-        setMaxAmount
+        setMaxAmount,
+        errorMessage,
     };
 };
 
@@ -75,35 +90,49 @@ export const useSendToWallet = () => {
     const [txnHash, setTxnHash] = useState<string>();
     const [amount, setAmount] = useState<number>(0);
     const [wallet, setWallet] = useState<string>('');
+    const [errorMessage, setError] = useState<string>();
 
     const { account } = useAccount();
     const explorer = useExplorer();
     
-    const { data: balance, error } = useBalance({
+    const { data: balance } = useBalance({
         address: account?.address as `0x${string}`,
         token: ETH_CONTRACT,
     });
 
     const execute = useCallback(
         async (amount: Uint256) => {
-            if (!account || error) return;
+            if (!account) {
+                setError("No account connected");
+                return;
+            }
+            if (!wallet) {
+                setError("Invalid wallet address");
+                return;
+            }
             
             setSubmitted(true);
             setTxnHash(undefined);
+            setError(undefined);
 
-            if(balance && cairo.uint256(balance.value) >= amount) {
-                account
-                    .execute([{
+            try {
+                if(balance && cairo.uint256(balance.value) >= amount) {
+                    const result = await account.execute([{
                         contractAddress: ETH_CONTRACT,
                         entrypoint: "transfer",
                         calldata: [wallet, amount],
-                    }])
-                    .then(({ transaction_hash }) => setTxnHash(transaction_hash))
-                    .catch((e) => console.error(e))
-                    .finally(() => setSubmitted(false));
-            } 
+                    }]);
+                    setTxnHash(result.transaction_hash);
+                } else {
+                    setError("Insufficient balance");
+                }
+            } catch (e) {
+                setError(e instanceof Error ? e.message : "Transaction failed");
+            } finally {
+                setSubmitted(false);
+            }
         },
-        [account, balance, error, wallet]
+        [account, balance, wallet]
     );
 
     const setMaxAmount = () => {
@@ -120,6 +149,7 @@ export const useSendToWallet = () => {
         setAmount,
         setWallet,
         execute,
-        setMaxAmount
+        setMaxAmount,
+        errorMessage,
     };
 };
