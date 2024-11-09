@@ -49,6 +49,10 @@ export function useWalletBalances() {
   const nstUsdValue = nstUsdBalance ? Number(nstUsdBalance.formatted) : 0
   const strkValue = strkBalance ? Number(strkBalance.toString()) : 0
 
+  const fetchBalances = () => {
+    // Implement your fetch logic here
+  }
+
   return {
     account,
     balances: {
@@ -56,6 +60,7 @@ export function useWalletBalances() {
       usdc: usdcValue,
       cashBalance: ethValue + usdcValue,
       investedBalance: nstUsdValue + strkValue,
-    }
+    },
+    refetch: fetchBalances
   }
 }

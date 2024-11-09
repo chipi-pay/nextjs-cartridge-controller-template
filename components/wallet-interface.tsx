@@ -332,7 +332,6 @@ const HomeView = () => {
           spread: 70,
           origin: { y: 0.6 }
         });
-        await balances.refetch();
       }
     } catch (error) {
       console.error('❌ Fetch error:', error);
@@ -344,8 +343,7 @@ const HomeView = () => {
         variant: "destructive",
       });
     } finally {
-      setIsProcessing(true);
-      setHasProcessed(true);
+      setIsProcessing(false);
     }
   };
 

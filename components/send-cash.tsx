@@ -29,7 +29,6 @@ export function SendCash({ onBack = () => {} }: SendCashProps) {
   const {
     submitted: submittedWallet,
     txnHash: txnHashWallet,
-    wallet: walletAddress,
     setWallet,
     execute: executeWallet,
     errorMessage: walletError,
@@ -81,7 +80,7 @@ export function SendCash({ onBack = () => {} }: SendCashProps) {
           description: "Transaction submitted successfully",
         })
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: (isChipiFriend ? usernameError : walletError) || "Transaction failed",
