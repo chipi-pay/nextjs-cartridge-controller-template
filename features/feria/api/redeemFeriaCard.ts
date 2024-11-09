@@ -32,7 +32,7 @@ export async function redeemFeriaCard({
       cardCode,
     },
     data: {
-      redeemed: true,
+      redeemed: false,
       redeemedWallet,
       redeemedChain,
       redeemedCoin,
@@ -41,6 +41,23 @@ export async function redeemFeriaCard({
   });
 
   if (!updatedCard.cardCode) throw new Error("Failed to redeem feria card");
+
+  const apiUrl = new URL(`/api`, "http://localhost:3000");
+  apiUrl.searchParams.append("code", cardCode);
+
+  const response = await fetch(apiUrl.toString(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      address: redeemedWallet,
+      amount: existingCard.amount,
+    }),
+  });
+
+  const data = await response.json();
+  console.log(data);
 
   return updatedCard;
 }
