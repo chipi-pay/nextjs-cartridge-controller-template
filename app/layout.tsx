@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { StarknetProvider } from "@/app/providers/StarknetProvider";
+import { Analytics } from '@vercel/analytics/react';
 
 
 
@@ -19,6 +20,8 @@ export default function RootLayout({
       <body>
         <StarknetProvider>
           {children}
+          <Analytics />
+
         </StarknetProvider>
       </body>
     </html>
