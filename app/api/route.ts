@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { type NextRequest } from 'next/server';
 import dotenv from 'dotenv';
-import { Account, CallData, cairo, RpcProvider, Contract } from 'starknet';
+import { Account, cairo, RpcProvider, Contract } from 'starknet';
 import { ETH_CONTRACT, USDC_CONTRACT } from '@/app/constants/contracts';
 import { ERC20 } from '../ABIs/erc20';
 
