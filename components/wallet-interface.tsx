@@ -102,7 +102,7 @@ export function WalletInterface() {
 }
 
 const HomeView = () => {
-  const { balances } = useWalletBalances()
+  const { balances, refetch } = useWalletBalances()
   const { account } = useAccount()
   const { toast } = useToast()
   const [username, setUsername] = useState<string>()
@@ -113,7 +113,6 @@ const HomeView = () => {
     x: number;
     y: number;
   }>>([])
-  const [isProcessing, setIsProcessing] = useState(false);
   const [redeemMessage, setRedeemMessage] = useState<string>("");
   const [userAddress, setUserAddress] = useState<string>();
   const [normalizedUserAddress, setNormalizedUserAddress] = useState<string>();
@@ -274,80 +273,78 @@ const HomeView = () => {
     }
   }
 
-  const handleRedeem = async () => {
-    if (!account || !userAddress || !normalizedUserAddress) return;
+  useEffect(() => {
+    const processRedeem = async () => {
+      if (!account?.address || !userAddress || !normalizedUserAddress) {
+        console.log('⏳ Waiting for addresses to be set...');
+        return;
+      }
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    
-    if (!code) {
-      toast({
-        title: "No code found",
-        description: "Please use a valid redeem link",
-        variant: "destructive",
-      });
-      return;
-    }
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      
+      if (!code) return;
 
-    try {
-      setIsProcessing(true);
-      
-      const requestBody = {
-        code,
-        userAddress,
-        normalizedUserAddress
-      };
-      
-      // Debug log before sending request
-      console.log('🚀 Sending Request:', requestBody);
+      try {
+        const requestBody = {
+          code,
+          userAddress,
+          normalizedUserAddress
+        };
+        
+        console.log('🚀 Sending Request:', requestBody);
 
-      const response = await fetch(`/api?code=${code}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody)
-      });
+        const response = await fetch(`/api?code=${code}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody)
+        });
 
-      const data = await response.json();
-      
-      // Debug response
-      console.log('📡 Response:', data);
-      
-      if (data.error) {
-        console.error('❌ Error:', data.error);
-        setRedeemMessage(data.error);
+        const data = await response.json();
+        
+        console.log('📡 Response:', data);
+        
+        if (data.error) {
+          console.error('❌ Error:', data.error);
+          setRedeemMessage(data.error);
+          toast({
+            title: "Redeem failed",
+            description: data.error,
+            variant: "destructive",
+          });
+        } else if (data.message) {
+          console.log('✅ Success:', data);
+          setRedeemMessage(data.message);
+          toast({
+            title: "Redeem successful!",
+            description: data.message,
+          });
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
+          // Refresh balances after successful redeem
+          await refetch();
+        }
+      } catch (error) {
+        console.error('❌ Fetch error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to process rewards. Please try again later.';
+        setRedeemMessage(errorMessage);
         toast({
           title: "Redeem failed",
-          description: data.error,
+          description: errorMessage,
           variant: "destructive",
         });
-      } else if (data.message) {
-        console.log('✅ Success:', data);
-        setRedeemMessage(data.message);
-        toast({
-          title: "Redeem successful!",
-          description: data.message,
-        });
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
       }
-    } catch (error) {
-      console.error('❌ Fetch error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to process rewards. Please try again later.';
-      setRedeemMessage(errorMessage);
-      toast({
-        title: "Redeem failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessing(false);
+    };
+
+    if (account?.address && userAddress && normalizedUserAddress) {
+      processRedeem();
     }
-  };
+  }, [account, userAddress, normalizedUserAddress]);
 
   return (
     <div className="space-y-6">
