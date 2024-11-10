@@ -8,7 +8,6 @@ import { useToast } from "@/hooks/use-toast";
 import Confetti from "react-confetti";
 import { useRedeemFeriaCard } from "@/features/feria/hooks/useRedeemFeriaCard";
 import { useAccount } from "@starknet-react/core";
-import { ChainEnum, CoinEnum } from "@prisma/client";
 
 interface RedeemProps {
   onBack?: () => void;
@@ -48,9 +47,7 @@ export function Redeem({ onBack = () => {} }: RedeemProps) {
     redeemFeriaCard(
       {
         cardCode: code,
-        redeemedWallet: account?.address as string,
-        redeemedChain: ChainEnum.STARKNET,
-        redeemedCoin: CoinEnum.USDC,
+        walletAddress: account?.address as string,
       },
       {
         onSuccess: (data) => {

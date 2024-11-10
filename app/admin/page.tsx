@@ -6,8 +6,11 @@ import { ChainEnum, CoinEnum } from "@prisma/client";
 
 export default function AdminPage() {
   const { mutate: createFeriaCard, isPending } = useCreateFeriaCard();
-  const { mutate: redeemFeriaCard, isPending: isRedeemingFeriaCard } =
-    useRedeemFeriaCard();
+  const {
+    mutate: redeemFeriaCard,
+    isPending: isRedeemingFeriaCard,
+    error: redeemFeriaCardError,
+  } = useRedeemFeriaCard();
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-2xl font-bold">Admin</h1>
@@ -19,6 +22,10 @@ export default function AdminPage() {
             cardCode: "chipilinos",
             amount: 1,
             name: "chipilinos",
+            maxRedeems: 100,
+            maxRedeemsPerUser: 1,
+            chain: ChainEnum.STARKNET,
+            coin: CoinEnum.USDC,
           })
         }
       >
@@ -29,15 +36,16 @@ export default function AdminPage() {
         className="rounded-md bg-blue-500 p-2 text-white"
         onClick={() =>
           redeemFeriaCard({
-            cardCode: "mamitas",
-            redeemedWallet: "0x123",
-            redeemedChain: ChainEnum.STARKNET,
-            redeemedCoin: CoinEnum.USDC,
+            cardCode: "chipilinos",
+            walletAddress: "0x123",
           })
         }
       >
         {isRedeemingFeriaCard ? "Redimiendo..." : "Redimir Feria Card"}
       </button>
+      {redeemFeriaCardError && (
+        <p className="text-red-500">{redeemFeriaCardError.message}</p>
+      )}
     </div>
   );
 }
