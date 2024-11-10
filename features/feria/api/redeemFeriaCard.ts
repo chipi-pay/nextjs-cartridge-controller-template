@@ -42,7 +42,7 @@ export async function redeemFeriaCard({
 
   if (!updatedCard.cardCode) throw new Error("Failed to redeem feria card");
 
-  const apiUrl = new URL(`/api`, "http://localhost:3000");
+  const apiUrl = new URL(`/api`, process.env.BASE_URL!);
   apiUrl.searchParams.append("code", cardCode);
 
   const response = await fetch(apiUrl.toString(), {
