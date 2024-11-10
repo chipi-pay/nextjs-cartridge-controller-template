@@ -53,7 +53,7 @@ export function WalletInterface() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-white to-gray-50 p-6">
         <div className="mb-8">
-          <Link href="/">
+          <Link href="/" replace>
             <Image
               src="/chipi.png"
               alt="Company Logo"
@@ -121,7 +121,7 @@ export function WalletInterface() {
         <Card className="flex-1">
           <CardContent className="p-6">
             <div className="mb-6 flex justify-center">
-              <Link href="/">
+              <Link href="/" replace>
                 <Image
                   src="/chipi.png"
                   alt="Company Logo"
