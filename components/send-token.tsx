@@ -28,19 +28,19 @@ interface SendTokenProps {
 
 const TOKENS = {
   ETH: {
-    name: "Ethereum",
+    name: "ETH",
     decimals: 18,
     symbol: "ETH",
     address: ETH_CONTRACT,
   },
   STRK: {
-    name: "Starknet Brother Token",
+    name: "Starknet Brother",
     decimals: 18,
-    symbol: "STRK",
+    symbol: "BROTHER",
     address: STARKNET_BROTHER_TOKEN,
   },
   ALF: {
-    name: "ALF Token",
+    name: "ALF",
     decimals: 18,
     symbol: "ALF",
     address: ALF_TOKEN,
@@ -52,7 +52,7 @@ const TOKENS = {
     address: USDC_CONTRACT,
   },
   SLINK: {
-    name: "Starknet LINK",
+    name: "SLINK",
     decimals: 18,
     symbol: "SLINK",
     address: SLINK_TOKEN,
