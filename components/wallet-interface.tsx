@@ -370,6 +370,8 @@ const HomeView = () => {
     if (!code) return;
 
     try {
+      await new Promise((resolve) => setTimeout(resolve, 13000));
+
       redeemFeriaCard(
         {
           cardCode: code,
@@ -430,6 +432,19 @@ const HomeView = () => {
       processRedeem();
     }
   }, [account, userAddress, normalizedUserAddress]);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get("code");
+
+    if (code) {
+      toast({
+        title: "DO NOT REFRESH THE PAGE",
+        description: "We are preparing your gift, wait 13 seconds",
+        duration: 12000, // Remove just before confetti (13000 - 1000)
+      });
+    }
+  }, []); // Run once on component mount
 
   return (
     <div className="space-y-6">
