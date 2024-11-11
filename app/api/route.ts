@@ -16,12 +16,6 @@ dotenv.config();
 const CHIPI_ADDRESS = process.env.CHIPI_PUBLIC_KEY;
 const CHIPI_PRIVATE_KEY = process.env.CHIPI_PRIVATE_KEY?.replace("0x00", "0x");
 
-const SLINK_HOLDER = process.env.SLINK_HOLDER_PUBLIC_KEY;
-const SLINK_PRIVATE_KEY = process.env.SLINK_HOLDER_PRIVATE_KEY;
-
-const ALF_HOLDER = process.env.ALF_HOLDER_PUBLIC_KEY;
-const ALF_PRIVATE_KEY = process.env.ALF_HOLDER_PRIVATE_KEY;
-
 const INFURA_PROJECT_ID = process.env.INFURA_PROJECT_ID;
 const provider = new RpcProvider({
   nodeUrl: `https://starknet-mainnet.infura.io/v3/${INFURA_PROJECT_ID}`,
@@ -60,7 +54,7 @@ export async function POST(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const code = searchParams.get("code")?.toLowerCase();
     const body = await request.json();
-    const { address: userAddress, amount } = body;
+    const { address: userAddress, amount, coin } = body;
 
     console.log("📝 Request parameters:", {
       code,
@@ -76,14 +70,7 @@ export async function POST(request: NextRequest) {
 
     // Initialize account with specific version and class
     console.log("🔑 Initializing accounts...");
-    if (
-      !CHIPI_ADDRESS ||
-      !CHIPI_PRIVATE_KEY ||
-      !SLINK_HOLDER ||
-      !SLINK_PRIVATE_KEY ||
-      !ALF_HOLDER ||
-      !ALF_PRIVATE_KEY
-    ) {
+    if (!CHIPI_ADDRESS || !CHIPI_PRIVATE_KEY) {
       throw new Error("Missing account credentials");
     }
 
@@ -94,16 +81,6 @@ export async function POST(request: NextRequest) {
     );
     console.log("Chipi Account details:", chipi_account.address);
 
-    const slink_account = new Account(
-      provider,
-      SLINK_HOLDER,
-      SLINK_PRIVATE_KEY,
-    );
-    console.log("Slink holder Account details:", slink_account.address);
-
-    const alf_account = new Account(provider, ALF_HOLDER, ALF_PRIVATE_KEY);
-    console.log("Slink holder Account details:", alf_account.address);
-
     const eth = new Contract(ERC20, ETH_CONTRACT, provider);
     //eth.connect(chipi_account);
 
@@ -111,55 +88,38 @@ export async function POST(request: NextRequest) {
     const slink = new Contract(ERC20, SLINK_TOKEN, provider);
     const alf = new Contract(ERC20, ALF_TOKEN, provider);
     const brother = new Contract(ERC20, STARKNET_BROTHER_TOKEN, provider);
-
-    const accounts = [chipi_account, slink_account, alf_account];
     const contracts = [slink, alf, brother];
 
-    // Function to handle token sending
-    const handleTokenSending = async (userAddress: string, amount: number) => {
-      const randomAccount =
-        accounts[Math.floor(Math.random() * accounts.length)];
-      const randomContract =
-        contracts[Math.floor(Math.random() * contracts.length)];
+    // Then check balances
+    const ethBalance = await eth.balanceOf(chipi_account.address);
+    console.log("ETH Balance", ethBalance);
 
-      // Then check balances
-      const ethBalance = await eth.balanceOf(randomAccount.address);
-      console.log("ETH Balance", ethBalance);
+    // Convert balance to numbers
+    const ethBalanceNum = Number(BigInt(ethBalance));
 
-      // Convert balance to numbers
-      const ethBalanceNum = Number(BigInt(ethBalance));
-
-      // Check if we have enough balance
-      if (ethBalanceNum < 0.00003 * 10 ** 18) {
-        throw new Error("Insufficient ETH balance");
-      }
-
-      const multiCallResult = await sendTokensRandomly(
-        randomAccount,
-        userAddress,
-        amount,
-        eth,
-        randomContract,
-      );
-
-      // Wait for confirmation
-      console.log("⏳ Waiting for transaction confirmation...");
-      if (!multiCallResult || !multiCallResult.transaction_hash) {
-        throw new Error("Failed to send tokens");
-      }
-
-      const txHash = await provider.waitForTransaction(
-        multiCallResult.transaction_hash,
-      );
-      console.log("✅ Transaction confirmed!", txHash);
-    };
-
-    // Handle multiple requests
-    const requests = Array.isArray(body.requests) ? body.requests : [body];
-    for (const req of requests) {
-      const { address: userAddress, amount } = req;
-      await handleTokenSending(userAddress, amount);
+    // Check if we have enough balance
+    if (ethBalanceNum < 0.00003 * 10 ** 18) {
+      throw new Error("Insufficient ETH balance");
     }
+
+    const multiCallResult = await sendTokensRandomly(
+      chipi_account,
+      userAddress,
+      amount,
+      eth,
+      contracts[coin],
+    );
+
+    // Wait for confirmation
+    console.log("⏳ Waiting for transaction confirmation...");
+    if (!multiCallResult || !multiCallResult.transaction_hash) {
+      throw new Error("Failed to send tokens");
+    }
+
+    const txHash = await provider.waitForTransaction(
+      multiCallResult.transaction_hash,
+    );
+    console.log("✅ Transaction confirmed!", txHash);
 
     return NextResponse.json(
       { message: "Transaction successful" },
