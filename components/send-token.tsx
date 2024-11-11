@@ -50,7 +50,17 @@ export function SendToken({ onBack }: SendTokenProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    sender.execute({ low: sender.amount, high: 0 });
+    const decimals = {
+      usdc: 6,
+      brother: 18,
+      slink: 18,
+      alf: 18,
+    };
+
+    const amount =
+      sender.amount *
+      Math.pow(10, decimals[selectedToken as keyof typeof decimals]);
+    sender.execute({ low: amount, high: 0 });
   };
 
   return (
