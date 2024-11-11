@@ -491,7 +491,7 @@ const HomeView = () => {
               ${balances.cashBalance.toFixed(2)}
             </p>
             <div className="mt-2 text-sm text-muted-foreground">
-              <div>ETH: {balances.eth.toFixed(4)}</div>
+              <div>ETH: {balances.eth.toFixed(5)}</div>
               <div>USDC: ${balances.usdc.toFixed(2)}</div>
               <div>STARKNET BROTHER: {brotherBalance.toFixed(2)}</div>
               <div>ALF: {balances.alf.toFixed(2)}</div>
