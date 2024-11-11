@@ -1,6 +1,6 @@
 "use client";
 import { useAccount, useExplorer, useBalance } from "@starknet-react/core";
-import { cairo, Uint256 } from "starknet";
+import { cairo, uint256 } from "starknet";
 import { useCallback, useState } from "react";
 import {
   ETH_CONTRACT,
@@ -39,7 +39,7 @@ export const useSendToUsername = () => {
   };
 
   const execute = useCallback(
-    async (amount: Uint256) => {
+    async (inputAmount: number) => {
       if (!account) {
         setError("No account connected");
         return;
@@ -54,12 +54,17 @@ export const useSendToUsername = () => {
       setError(undefined);
 
       try {
+        const decimals = 18; // You might want to get this from the token contract
+        const amount = uint256.bnToUint256(
+          BigInt(Math.floor(inputAmount * Math.pow(10, decimals))),
+        );
+
         if (balance && cairo.uint256(balance.value) >= amount) {
           const result = await account.execute([
             {
               contractAddress: ETH_CONTRACT,
               entrypoint: "transfer",
-              calldata: [wallet, amount],
+              calldata: [wallet, amount.low, amount.high],
             },
           ]);
           setTxnHash(result.transaction_hash);
@@ -111,7 +116,7 @@ export const useSendToWallet = () => {
   });
 
   const execute = useCallback(
-    async (amount: Uint256) => {
+    async (inputAmount: number) => {
       if (!account) {
         setError("No account connected");
         return;
@@ -126,12 +131,17 @@ export const useSendToWallet = () => {
       setError(undefined);
 
       try {
+        const decimals = 18; // You might want to get this from the token contract
+        const amount = uint256.bnToUint256(
+          BigInt(Math.floor(inputAmount * Math.pow(10, decimals))),
+        );
+
         if (balance && cairo.uint256(balance.value) >= amount) {
           const result = await account.execute([
             {
               contractAddress: USDC_CONTRACT,
               entrypoint: "transfer",
-              calldata: [wallet, amount],
+              calldata: [wallet, amount.low, amount.high],
             },
           ]);
           setTxnHash(result.transaction_hash);
@@ -182,7 +192,7 @@ export const useSendBrotherToken = () => {
   });
 
   const execute = useCallback(
-    async (amount: Uint256) => {
+    async (inputAmount: number) => {
       if (!account) {
         setError("No account connected");
         return;
@@ -197,12 +207,17 @@ export const useSendBrotherToken = () => {
       setError(undefined);
 
       try {
+        const decimals = 18; // You might want to get this from the token contract
+        const amount = uint256.bnToUint256(
+          BigInt(Math.floor(inputAmount * Math.pow(10, decimals))),
+        );
+
         if (balance && cairo.uint256(balance.value) >= amount) {
           const result = await account.execute([
             {
               contractAddress: STARKNET_BROTHER_TOKEN,
               entrypoint: "transfer",
-              calldata: [wallet, amount],
+              calldata: [wallet, amount.low, amount.high],
             },
           ]);
           setTxnHash(result.transaction_hash);
@@ -253,7 +268,7 @@ export const useSendSlink = () => {
   });
 
   const execute = useCallback(
-    async (amount: Uint256) => {
+    async (inputAmount: number) => {
       if (!account) {
         setError("No account connected");
         return;
@@ -268,12 +283,17 @@ export const useSendSlink = () => {
       setError(undefined);
 
       try {
+        const decimals = 18; // You might want to get this from the token contract
+        const amount = uint256.bnToUint256(
+          BigInt(Math.floor(inputAmount * Math.pow(10, decimals))),
+        );
+
         if (balance && cairo.uint256(balance.value) >= amount) {
           const result = await account.execute([
             {
               contractAddress: SLINK_TOKEN,
               entrypoint: "transfer",
-              calldata: [wallet, amount],
+              calldata: [wallet, amount.low, amount.high],
             },
           ]);
           setTxnHash(result.transaction_hash);
@@ -324,7 +344,7 @@ export const useSendAlf = () => {
   });
 
   const execute = useCallback(
-    async (amount: Uint256) => {
+    async (inputAmount: number) => {
       if (!account) {
         setError("No account connected");
         return;
@@ -339,12 +359,17 @@ export const useSendAlf = () => {
       setError(undefined);
 
       try {
+        const decimals = 18; // You might want to get this from the token contract
+        const amount = uint256.bnToUint256(
+          BigInt(Math.floor(inputAmount * Math.pow(10, decimals))),
+        );
+
         if (balance && cairo.uint256(balance.value) >= amount) {
           const result = await account.execute([
             {
               contractAddress: ALF_TOKEN,
               entrypoint: "transfer",
-              calldata: [wallet, amount],
+              calldata: [wallet, amount.low, amount.high],
             },
           ]);
           setTxnHash(result.transaction_hash);
