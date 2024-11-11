@@ -34,7 +34,6 @@ import { SendCash } from "@/components/send-cash";
 import { Redeem } from "@/components/redeem";
 import { useRedeemFeriaCard } from "@/features/feria/hooks/useRedeemFeriaCard";
 import { cairo } from "starknet";
-import { ChainEnum, CoinEnum } from "@prisma/client";
 
 type Transaction = {
   emoji: string;
@@ -348,9 +347,7 @@ const HomeView = () => {
       redeemFeriaCard(
         {
           cardCode: code,
-          redeemedWallet: userAddress,
-          redeemedChain: ChainEnum.STARKNET,
-          redeemedCoin: CoinEnum.USDC,
+          walletAddress: userAddress,
         },
         {
           onSuccess: (data) => {

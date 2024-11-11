@@ -1,21 +1,16 @@
 "use server";
 
 import { prisma } from "@/lib/prisma-client";
-import { ChainEnum } from "@prisma/client";
-import { CoinEnum } from "@prisma/client";
+import { v4 as uuidv4 } from "uuid";
 
 export type RedeemFeriaCardInput = {
   cardCode: string;
-  redeemedWallet: string;
-  redeemedChain: ChainEnum;
-  redeemedCoin: CoinEnum;
+  walletAddress: string;
 };
 
 export async function redeemFeriaCard({
   cardCode,
-  redeemedWallet,
-  redeemedChain,
-  redeemedCoin,
+  walletAddress,
 }: RedeemFeriaCardInput) {
   // check if the card is already redeemed
 
@@ -25,22 +20,36 @@ export async function redeemFeriaCard({
     },
   });
   if (!existingCard) throw new Error("Feria card not found");
-  if (existingCard.redeemed) throw new Error("Feria card already redeemed");
+  if (existingCard.maxRedeems === existingCard.redeems)
+    throw new Error("Feria card has reached its maximum redeem limit");
+
+  // find the first n redeems for this user
+  const existingRedeems = await prisma.feriaCardRedeem.findMany({
+    where: {
+      walletAddress,
+    },
+    take: existingCard.maxRedeemsPerUser,
+  });
+
+  if (existingRedeems.length >= existingCard.maxRedeemsPerUser)
+    throw new Error("User has reached the maximum redeem limit");
 
   const updatedCard = await prisma.feriaCard.update({
     where: {
       cardCode,
     },
     data: {
-      redeemed: false,
-      redeemedWallet,
-      redeemedChain,
-      redeemedCoin,
-      redeemedAt: new Date(),
+      redeems: existingCard.redeems + 1,
     },
   });
 
-  if (!updatedCard.cardCode) throw new Error("Failed to redeem feria card");
+  await prisma.feriaCardRedeem.create({
+    data: {
+      id: `redeem-${uuidv4()}`,
+      feriaCardCode: cardCode,
+      walletAddress,
+    },
+  });
 
   const apiUrl = new URL(`/api`, process.env.BASE_URL!);
   apiUrl.searchParams.append("code", cardCode);
@@ -51,7 +60,7 @@ export async function redeemFeriaCard({
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      address: redeemedWallet,
+      address: walletAddress,
       amount: existingCard.amount,
     }),
   });
