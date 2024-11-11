@@ -31,7 +31,7 @@ import Link from "next/link";
 import { connector } from "@/app/providers/StarknetProvider";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
-import { SendCash } from "@/components/send-cash";
+import { SendToken } from "@/components/send-token";
 import { Redeem } from "@/components/redeem";
 import { useRedeemFeriaCard } from "@/features/feria/hooks/useRedeemFeriaCard";
 import { cairo } from "starknet";
@@ -581,7 +581,7 @@ const HomeView = () => {
         </Button>
       </div>
 
-      {showSendCard && <SendCash onBack={() => setShowSendCard(false)} />}
+      {showSendCard && <SendToken onBack={() => setShowSendCard(false)} />}
 
       {showRedeemCard && <Redeem onBack={() => setShowRedeemCard(false)} />}
     </div>
