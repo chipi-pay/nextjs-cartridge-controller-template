@@ -13,7 +13,7 @@ import { CoinEnum } from "@prisma/client";
 
 dotenv.config();
 
-export const COIN_ADDRESS: Partial<Record<CoinEnum, string>> = {
+const COIN_ADDRESS: Partial<Record<CoinEnum, string>> = {
   [CoinEnum.ALF]: ALF_TOKEN,
   [CoinEnum.BROTHER]: STARKNET_BROTHER_TOKEN,
   [CoinEnum.SLINK]: SLINK_TOKEN,
