@@ -9,9 +9,15 @@ import {
   ALF_TOKEN,
 } from "@/app/constants/contracts";
 import { ERC20 } from "../ABIs/erc20";
+import { CoinEnum } from "@prisma/client";
 
 dotenv.config();
 
+export const COIN_ADDRESS: Partial<Record<CoinEnum, string>> = {
+  [CoinEnum.ALF]: ALF_TOKEN,
+  [CoinEnum.BROTHER]: STARKNET_BROTHER_TOKEN,
+  [CoinEnum.SLINK]: SLINK_TOKEN,
+};
 // Constants and provider setup
 const CHIPI_ADDRESS = process.env.CHIPI_PUBLIC_KEY;
 const CHIPI_PRIVATE_KEY = process.env.CHIPI_PRIVATE_KEY?.replace("0x00", "0x");
@@ -21,32 +27,6 @@ const provider = new RpcProvider({
   nodeUrl: `https://starknet-mainnet.infura.io/v3/${INFURA_PROJECT_ID}`,
 });
 
-export const sendTokensRandomly = async (
-  account: Account,
-  userAddress: string,
-  amount: number,
-  eth: Contract,
-  contract: Contract,
-) => {
-  try {
-    // aca comienza el random
-    const multiCall = await account.execute([
-      eth.populate("transfer", [
-        userAddress,
-        cairo.uint256(0.00003 * 10 ** 18),
-      ]),
-      contract.populate("transfer", [
-        userAddress,
-        cairo.uint256(amount * 10 ** 18),
-      ]),
-    ]);
-
-    return multiCall;
-  } catch (error) {
-    console.log("❌ Error sending tokens:", error);
-  }
-};
-
 export async function POST(request: NextRequest) {
   try {
     console.log("🚀 Starting new request...");
@@ -54,7 +34,11 @@ export async function POST(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const code = searchParams.get("code")?.toLowerCase();
     const body = await request.json();
-    const { address: userAddress, amount, coin } = body;
+    const {
+      address: userAddress,
+      amount,
+      coin,
+    }: { address: string; amount: number; coin: keyof typeof CoinEnum } = body;
 
     console.log("📝 Request parameters:", {
       code,
@@ -85,13 +69,15 @@ export async function POST(request: NextRequest) {
     //eth.connect(chipi_account);
 
     // Set contracts
-    const slink = new Contract(ERC20, SLINK_TOKEN, provider);
-    const alf = new Contract(ERC20, ALF_TOKEN, provider);
-    const brother = new Contract(ERC20, STARKNET_BROTHER_TOKEN, provider);
-    const contracts = [slink, alf, brother];
+    const coinAddress = COIN_ADDRESS[coin];
+    if (!coinAddress) {
+      throw new Error(`Invalid coin type: ${coin}`);
+    }
+    const contract = new Contract(ERC20, coinAddress, provider);
 
     // Then check balances
     const ethBalance = await eth.balanceOf(chipi_account.address);
+    const memeBalance = await contract.balanceOf(chipi_account.address);
     console.log("ETH Balance", ethBalance);
 
     // Convert balance to numbers
@@ -102,22 +88,29 @@ export async function POST(request: NextRequest) {
       throw new Error("Insufficient ETH balance");
     }
 
-    const multiCallResult = await sendTokensRandomly(
-      chipi_account,
-      userAddress,
-      amount,
-      eth,
-      contracts[coin],
-    );
+    if (memeBalance < 1 * 10 ** 18) {
+      throw new Error(`Insufficient MEME balance for coin: ${coin}`);
+    }
+
+    const multiCall = await chipi_account.execute([
+      eth.populate("transfer", [
+        userAddress,
+        cairo.uint256(0.00003 * 10 ** 18),
+      ]),
+      contract.populate("transfer", [
+        userAddress,
+        cairo.uint256(amount * 10 ** 18),
+      ]),
+    ]);
 
     // Wait for confirmation
     console.log("⏳ Waiting for transaction confirmation...");
-    if (!multiCallResult || !multiCallResult.transaction_hash) {
+    if (!multiCall || !multiCall.transaction_hash) {
       throw new Error("Failed to send tokens");
     }
 
     const txHash = await provider.waitForTransaction(
-      multiCallResult.transaction_hash,
+      multiCall.transaction_hash,
     );
     console.log("✅ Transaction confirmed!", txHash);
 
