@@ -2,7 +2,13 @@
 import { useAccount, useExplorer, useBalance } from "@starknet-react/core";
 import { cairo, Uint256 } from "starknet";
 import { useCallback, useState } from "react";
-import { ETH_CONTRACT, USDC_CONTRACT } from "@/app/constants/contracts";
+import {
+  ETH_CONTRACT,
+  USDC_CONTRACT,
+  STARKNET_BROTHER_TOKEN,
+  SLINK_TOKEN,
+  ALF_TOKEN,
+} from "@/app/constants/contracts";
 
 export const useSendToUsername = () => {
   const [submitted, setSubmitted] = useState<boolean>(false);
@@ -124,6 +130,219 @@ export const useSendToWallet = () => {
           const result = await account.execute([
             {
               contractAddress: USDC_CONTRACT,
+              entrypoint: "transfer",
+              calldata: [wallet, amount],
+            },
+          ]);
+          setTxnHash(result.transaction_hash);
+        } else {
+          setError("Insufficient balance");
+        }
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Transaction failed");
+      } finally {
+        setSubmitted(false);
+      }
+    },
+    [account, balance, wallet],
+  );
+
+  const setMaxAmount = () => {
+    if (balance) setAmount(Number(balance.formatted));
+  };
+
+  return {
+    submitted,
+    txnHash,
+    amount,
+    wallet,
+    balance,
+    explorer,
+    setAmount,
+    setWallet,
+    execute,
+    setMaxAmount,
+    errorMessage,
+  };
+};
+
+export const useSendBrotherToken = () => {
+  const [submitted, setSubmitted] = useState<boolean>(false);
+  const [txnHash, setTxnHash] = useState<string>();
+  const [amount, setAmount] = useState<number>(0);
+  const [wallet, setWallet] = useState<string>("");
+  const [errorMessage, setError] = useState<string>();
+
+  const { account } = useAccount();
+  const explorer = useExplorer();
+
+  const { data: balance } = useBalance({
+    address: account?.address as `0x${string}`,
+    token: STARKNET_BROTHER_TOKEN,
+  });
+
+  const execute = useCallback(
+    async (amount: Uint256) => {
+      if (!account) {
+        setError("No account connected");
+        return;
+      }
+      if (!wallet) {
+        setError("Invalid wallet address");
+        return;
+      }
+
+      setSubmitted(true);
+      setTxnHash(undefined);
+      setError(undefined);
+
+      try {
+        if (balance && cairo.uint256(balance.value) >= amount) {
+          const result = await account.execute([
+            {
+              contractAddress: STARKNET_BROTHER_TOKEN,
+              entrypoint: "transfer",
+              calldata: [wallet, amount],
+            },
+          ]);
+          setTxnHash(result.transaction_hash);
+        } else {
+          setError("Insufficient balance");
+        }
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Transaction failed");
+      } finally {
+        setSubmitted(false);
+      }
+    },
+    [account, balance, wallet],
+  );
+
+  const setMaxAmount = () => {
+    if (balance) setAmount(Number(balance.formatted));
+  };
+
+  return {
+    submitted,
+    txnHash,
+    amount,
+    wallet,
+    balance,
+    explorer,
+    setAmount,
+    setWallet,
+    execute,
+    setMaxAmount,
+    errorMessage,
+  };
+};
+
+export const useSendSlink = () => {
+  const [submitted, setSubmitted] = useState<boolean>(false);
+  const [txnHash, setTxnHash] = useState<string>();
+  const [amount, setAmount] = useState<number>(0);
+  const [wallet, setWallet] = useState<string>("");
+  const [errorMessage, setError] = useState<string>();
+
+  const { account } = useAccount();
+  const explorer = useExplorer();
+
+  const { data: balance } = useBalance({
+    address: account?.address as `0x${string}`,
+    token: SLINK_TOKEN,
+  });
+
+  const execute = useCallback(
+    async (amount: Uint256) => {
+      if (!account) {
+        setError("No account connected");
+        return;
+      }
+      if (!wallet) {
+        setError("Invalid wallet address");
+        return;
+      }
+
+      setSubmitted(true);
+      setTxnHash(undefined);
+      setError(undefined);
+
+      try {
+        if (balance && cairo.uint256(balance.value) >= amount) {
+          const result = await account.execute([
+            {
+              contractAddress: SLINK_TOKEN,
+              entrypoint: "transfer",
+              calldata: [wallet, amount],
+            },
+          ]);
+          setTxnHash(result.transaction_hash);
+        } else {
+          setError("Insufficient balance");
+        }
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Transaction failed");
+      } finally {
+        setSubmitted(false);
+      }
+    },
+    [account, balance, wallet],
+  );
+
+  const setMaxAmount = () => {
+    if (balance) setAmount(Number(balance.formatted));
+  };
+
+  return {
+    submitted,
+    txnHash,
+    amount,
+    wallet,
+    balance,
+    explorer,
+    setAmount,
+    setWallet,
+    execute,
+    setMaxAmount,
+    errorMessage,
+  };
+};
+
+export const useSendAlf = () => {
+  const [submitted, setSubmitted] = useState<boolean>(false);
+  const [txnHash, setTxnHash] = useState<string>();
+  const [amount, setAmount] = useState<number>(0);
+  const [wallet, setWallet] = useState<string>("");
+  const [errorMessage, setError] = useState<string>();
+
+  const { account } = useAccount();
+  const explorer = useExplorer();
+
+  const { data: balance } = useBalance({
+    address: account?.address as `0x${string}`,
+    token: ALF_TOKEN,
+  });
+
+  const execute = useCallback(
+    async (amount: Uint256) => {
+      if (!account) {
+        setError("No account connected");
+        return;
+      }
+      if (!wallet) {
+        setError("Invalid wallet address");
+        return;
+      }
+
+      setSubmitted(true);
+      setTxnHash(undefined);
+      setError(undefined);
+
+      try {
+        if (balance && cairo.uint256(balance.value) >= amount) {
+          const result = await account.execute([
+            {
+              contractAddress: ALF_TOKEN,
               entrypoint: "transfer",
               calldata: [wallet, amount],
             },
