@@ -19,13 +19,13 @@ export default function AdminPage() {
         className="rounded-md bg-blue-500 p-2 text-white"
         onClick={() =>
           createFeriaCard({
-            cardCode: "chipilinos",
-            amount: 1,
-            name: "chipilinos",
-            maxRedeems: 100,
+            cardCode: "layerak4",
+            amount: 5,
+            name: "layerak4",
+            maxRedeems: 2,
             maxRedeemsPerUser: 1,
             chain: ChainEnum.STARKNET,
-            coin: CoinEnum.USDC,
+            coin: CoinEnum.BROTHER,
           })
         }
       >

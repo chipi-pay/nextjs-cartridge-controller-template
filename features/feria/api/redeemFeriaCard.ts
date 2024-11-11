@@ -14,6 +14,11 @@ export async function redeemFeriaCard({
 }: RedeemFeriaCardInput) {
   // check if the card is already redeemed
 
+  const chooseRandomCoin = () => {
+    const coins = ["ALF", "BROTHER", "SLINK"];
+    return coins[Math.floor(Math.random() * coins.length)];
+  };
+
   const existingCard = await prisma.feriaCard.findUnique({
     where: {
       cardCode,
@@ -34,6 +39,23 @@ export async function redeemFeriaCard({
   if (existingRedeems.length >= existingCard.maxRedeemsPerUser)
     throw new Error("User has reached the maximum redeem limit");
 
+  const apiUrl = new URL(`/api`, process.env.BASE_URL!);
+  apiUrl.searchParams.append("code", cardCode);
+
+  const response = await fetch(apiUrl.toString(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      address: walletAddress,
+      amount: existingCard.amount,
+      coin: chooseRandomCoin(),
+    }),
+  });
+
+  const data = await response.json();
+  console.log(data);
   const updatedCard = await prisma.feriaCard.update({
     where: {
       cardCode,
@@ -50,23 +72,6 @@ export async function redeemFeriaCard({
       walletAddress,
     },
   });
-
-  const apiUrl = new URL(`/api`, process.env.BASE_URL!);
-  apiUrl.searchParams.append("code", cardCode);
-
-  const response = await fetch(apiUrl.toString(), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      address: walletAddress,
-      amount: existingCard.amount,
-    }),
-  });
-
-  const data = await response.json();
-  console.log(data);
 
   return updatedCard;
 }

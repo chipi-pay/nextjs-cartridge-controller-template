@@ -45,8 +45,9 @@ enum ChainEnum {
 
 enum CoinEnum {
   USDC
-  USDT
-  DAI
   ETH
   STRK
+  SLINK
+  ALF
+  BROTHER
 }
