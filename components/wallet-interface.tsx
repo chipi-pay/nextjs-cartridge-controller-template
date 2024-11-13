@@ -363,6 +363,17 @@ const HomeView = () => {
       return;
     }
 
+    const username = await connector.username();
+
+    if (!username) {
+      toast({
+        title: "Username not found",
+        description: "Please set your username first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get("code");
 
@@ -375,6 +386,7 @@ const HomeView = () => {
         {
           cardCode: code,
           walletAddress: userAddress,
+          username,
         },
         {
           onSuccess: (data) => {

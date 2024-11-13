@@ -1,51 +1,14 @@
-"use client";
-
-import { useCreateFeriaCard } from "@/features/feria/hooks/useCreateFeriaCard";
-import { useRedeemFeriaCard } from "@/features/feria/hooks/useRedeemFeriaCard";
-import { ChainEnum, CoinEnum } from "@prisma/client";
+import { CreateFeriaCardForm } from "@/features/feria/components/CreateFeriaCardForm";
+import { RedeemFeriaCardForm } from "@/features/feria/components/RedeemFeriaCardForm";
 
 export default function AdminPage() {
-  const { mutate: createFeriaCard, isPending } = useCreateFeriaCard();
-  const {
-    mutate: redeemFeriaCard,
-    isPending: isRedeemingFeriaCard,
-    error: redeemFeriaCardError,
-  } = useRedeemFeriaCard();
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-8 p-6">
       <h1 className="text-2xl font-bold">Admin</h1>
-      <button
-        disabled={isPending}
-        className="rounded-md bg-blue-500 p-2 text-white"
-        onClick={() =>
-          createFeriaCard({
-            cardCode: "layerak4",
-            amount: 5,
-            name: "layerak4",
-            maxRedeems: 2,
-            maxRedeemsPerUser: 1,
-            chain: ChainEnum.STARKNET,
-            coin: CoinEnum.BROTHER,
-          })
-        }
-      >
-        {isPending ? "Creating..." : "Create Feria Card"}
-      </button>
-      <button
-        disabled={isRedeemingFeriaCard}
-        className="rounded-md bg-blue-500 p-2 text-white"
-        onClick={() =>
-          redeemFeriaCard({
-            cardCode: "chipilinos",
-            walletAddress: "0x123",
-          })
-        }
-      >
-        {isRedeemingFeriaCard ? "Redimiendo..." : "Redimir Feria Card"}
-      </button>
-      {redeemFeriaCardError && (
-        <p className="text-red-500">{redeemFeriaCardError.message}</p>
-      )}
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+        <CreateFeriaCardForm />
+        <RedeemFeriaCardForm />
+      </div>
     </div>
   );
 }

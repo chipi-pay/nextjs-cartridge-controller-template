@@ -48,6 +48,7 @@ export function Redeem({ onBack = () => {} }: RedeemProps) {
       {
         cardCode: code,
         walletAddress: account?.address as string,
+        username: account?.address as string,
       },
       {
         onSuccess: (data) => {

@@ -6,18 +6,20 @@ import { v4 as uuidv4 } from "uuid";
 export type RedeemFeriaCardInput = {
   cardCode: string;
   walletAddress: string;
+  username: string;
 };
 
 export async function redeemFeriaCard({
   cardCode,
   walletAddress,
+  username,
 }: RedeemFeriaCardInput) {
   // check if the card is already redeemed
 
-  const chooseRandomCoin = () => {
-    const coins = ["ALF", "BROTHER", "SLINK"];
-    return coins[Math.floor(Math.random() * coins.length)];
-  };
+  // const chooseRandomCoin = () => {
+  //   const coins = ["ALF", "BROTHER", "SLINK"];
+  //   return coins[Math.floor(Math.random() * coins.length)];
+  // };
 
   const existingCard = await prisma.feriaCard.findUnique({
     where: {
@@ -50,12 +52,14 @@ export async function redeemFeriaCard({
     body: JSON.stringify({
       address: walletAddress,
       amount: existingCard.amount,
-      coin: chooseRandomCoin(),
+      coin: existingCard.coin,
     }),
   });
 
   const data = await response.json();
   console.log(data);
+  if (data.error) throw new Error(data.error);
+
   const updatedCard = await prisma.feriaCard.update({
     where: {
       cardCode,
@@ -70,6 +74,7 @@ export async function redeemFeriaCard({
       id: `redeem-${uuidv4()}`,
       feriaCardCode: cardCode,
       walletAddress,
+      username,
     },
   });
 

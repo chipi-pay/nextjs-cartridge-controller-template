@@ -31,6 +31,7 @@ model FeriaCard {
 
 model FeriaCardRedeem {
   id            String   @id
+  username      String
   walletAddress String
   feriaCardCode String
   createdAt     DateTime @default(now())
