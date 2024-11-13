@@ -30,10 +30,11 @@ export async function redeemFeriaCard({
   if (existingCard.maxRedeems === existingCard.redeems)
     throw new Error("Feria card has reached its maximum redeem limit");
 
-  // find the first n redeems for this user
+  // find the first n redeems for this user and this specific card
   const existingRedeems = await prisma.feriaCardRedeem.findMany({
     where: {
       walletAddress,
+      feriaCardCode: cardCode,
     },
     take: existingCard.maxRedeemsPerUser,
   });
