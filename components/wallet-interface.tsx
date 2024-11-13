@@ -406,7 +406,9 @@ const HomeView = () => {
               description: "Code redeemed successfully",
             });
             refetch();
-            window.location.href = "/";
+            setTimeout(() => {
+              window.location.href = "/";
+            }, 2000);
             return;
           },
           onError: (error) => {
