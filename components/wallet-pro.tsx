@@ -114,6 +114,7 @@ export function WalletPro() {
   const { account } = useAccount();
   const [showMessageAlert, setShowMessageAlert] = useState(false);
 
+  console.log("wallet pro account", account);
   // If not connected, show connect wallet screen
   if (!account) {
     return (

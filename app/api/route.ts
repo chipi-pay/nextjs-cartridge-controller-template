@@ -7,6 +7,7 @@ import {
   SLINK_TOKEN,
   STARKNET_BROTHER_TOKEN,
   ALF_TOKEN,
+  USDC_CONTRACT,
 } from "@/app/constants/contracts";
 import { ERC20 } from "../ABIs/erc20";
 import { CoinEnum } from "@prisma/client";
@@ -17,6 +18,7 @@ const COIN_ADDRESS: Partial<Record<CoinEnum, string>> = {
   [CoinEnum.ALF]: ALF_TOKEN,
   [CoinEnum.BROTHER]: STARKNET_BROTHER_TOKEN,
   [CoinEnum.SLINK]: SLINK_TOKEN,
+  [CoinEnum.USDC]: USDC_CONTRACT,
 };
 // Constants and provider setup
 const CHIPI_ADDRESS = process.env.CHIPI_PUBLIC_KEY;
