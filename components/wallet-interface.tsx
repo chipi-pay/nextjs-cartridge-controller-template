@@ -35,6 +35,7 @@ import { SendToken } from "@/components/send-token";
 import { Redeem } from "@/components/redeem";
 import { useRedeemFeriaCard } from "@/features/feria/hooks/useRedeemFeriaCard";
 import { cairo } from "starknet";
+import { useSearchParams } from "next/navigation";
 
 type Transaction = {
   emoji: string;
@@ -155,6 +156,7 @@ export function WalletInterface() {
 
 const HomeView = () => {
   const { balances, refetch } = useWalletBalances();
+  const searchParams = useSearchParams();
   const { account } = useAccount();
   const { toast } = useToast();
   const [username, setUsername] = useState<string>();
@@ -358,6 +360,12 @@ const HomeView = () => {
   };
 
   const processRedeem = async () => {
+    const code = searchParams.get("code");
+    if (!code) {
+      console.log("❌ No redeem code found");
+      return;
+    }
+
     if (!account?.address || !userAddress || !normalizedUserAddress) {
       console.log("⏳ Waiting for addresses to be set...");
       return;
@@ -373,11 +381,6 @@ const HomeView = () => {
       });
       return;
     }
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get("code");
-
-    if (!code) return;
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 13000));
@@ -403,6 +406,8 @@ const HomeView = () => {
               description: "Code redeemed successfully",
             });
             refetch();
+            window.location.href = "/";
+            return;
           },
           onError: (error) => {
             const errorMessage =
@@ -418,9 +423,6 @@ const HomeView = () => {
           },
         },
       );
-
-      // Refresh balances after successful redeem
-      refetch();
     } catch (error) {
       console.error("❌ Fetch error:", error);
       const errorMessage =
@@ -443,9 +445,7 @@ const HomeView = () => {
   }, [account, userAddress, normalizedUserAddress]);
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get("code");
-
+    const code = searchParams.get("code");
     if (code) {
       toast({
         title: "DO NOT REFRESH THE PAGE",

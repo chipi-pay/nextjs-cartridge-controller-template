@@ -1,7 +1,14 @@
+"use client";
+
+import { useAccount } from "@starknet-react/core";
 import { CreateFeriaCardForm } from "@/features/feria/components/CreateFeriaCardForm";
 import { RedeemFeriaCardForm } from "@/features/feria/components/RedeemFeriaCardForm";
 
 export default function AdminPage() {
+  const { account } = useAccount();
+
+  console.log("admin page account", account);
+
   return (
     <div className="flex flex-col gap-8 p-6">
       <h1 className="text-2xl font-bold">Admin</h1>
