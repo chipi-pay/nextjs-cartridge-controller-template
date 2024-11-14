@@ -1,5 +1,3 @@
-import { NextResponse } from "next/server";
-import { type NextRequest } from "next/server";
 import dotenv from "dotenv";
 import { Account, cairo, RpcProvider, Contract } from "starknet";
 import {
@@ -8,7 +6,7 @@ import {
   STARKNET_BROTHER_TOKEN,
   ALF_TOKEN,
 } from "@/app/constants/contracts";
-import { ERC20 } from "../ABIs/erc20";
+import { ERC20 } from "@/lib/ABIs/erc20";
 import { CoinEnum } from "@prisma/client";
 
 dotenv.config();
@@ -27,30 +25,19 @@ const provider = new RpcProvider({
   nodeUrl: `https://starknet-mainnet.infura.io/v3/${INFURA_PROJECT_ID}`,
 });
 
-export async function POST(request: NextRequest) {
+export type SendCardFundsInput = {
+  code: string;
+  userAddress: string;
+  amount: number; // This is wrong!!! It should fetch the amount from the card
+  coin: keyof typeof CoinEnum;
+};
+
+export async function sendCardFunds(
+  input: SendCardFundsInput,
+): Promise<string> {
   try {
     console.log("🚀 Starting new request...");
-
-    const searchParams = request.nextUrl.searchParams;
-    const code = searchParams.get("code")?.toLowerCase();
-    const body = await request.json();
-    const {
-      address: userAddress,
-      amount,
-      coin,
-    }: { address: string; amount: number; coin: keyof typeof CoinEnum } = body;
-
-    console.log("📝 Request parameters:", {
-      code,
-      userAddress,
-      normalizedUserAddress: userAddress,
-    });
-
-    // Validate required parameters
-    if (!code || !userAddress) {
-      console.log("❌ Missing required parameters");
-      return NextResponse.json({});
-    }
+    const { code, userAddress, amount, coin } = input;
 
     // Initialize account with specific version and class
     console.log("🔑 Initializing accounts...");
@@ -58,12 +45,12 @@ export async function POST(request: NextRequest) {
       throw new Error("Missing account credentials");
     }
 
-    const chipi_account = new Account(
+    const chipiAccount = new Account(
       provider,
       CHIPI_ADDRESS,
       CHIPI_PRIVATE_KEY,
     );
-    console.log("Chipi Account details:", chipi_account.address);
+    console.log("Chipi Account details:", chipiAccount.address);
 
     const eth = new Contract(ERC20, ETH_CONTRACT, provider);
     //eth.connect(chipi_account);
@@ -76,8 +63,8 @@ export async function POST(request: NextRequest) {
     const contract = new Contract(ERC20, coinAddress, provider);
 
     // Then check balances
-    const ethBalance = await eth.balanceOf(chipi_account.address);
-    const memeBalance = await contract.balanceOf(chipi_account.address);
+    const ethBalance = await eth.balanceOf(chipiAccount.address);
+    const memeBalance = await contract.balanceOf(chipiAccount.address);
     console.log("ETH Balance", ethBalance);
 
     // Convert balance to numbers
@@ -92,7 +79,7 @@ export async function POST(request: NextRequest) {
       throw new Error(`Insufficient MEME balance for coin: ${coin}`);
     }
 
-    const multiCall = await chipi_account.execute([
+    const multiCall = await chipiAccount.execute([
       eth.populate("transfer", [
         userAddress,
         cairo.uint256(0.00003 * 10 ** 18),
@@ -109,15 +96,12 @@ export async function POST(request: NextRequest) {
       throw new Error("Failed to send tokens");
     }
 
-    const txHash = await provider.waitForTransaction(
-      multiCall.transaction_hash,
-    );
-    console.log("✅ Transaction confirmed!", txHash);
+    // const txHash = await provider.waitForTransaction(
+    //   multiCall.transaction_hash,
+    // );
+    // console.log("✅ Transaction confirmed!", txHash);
 
-    return NextResponse.json(
-      { message: "Transaction successful" },
-      { status: 200 },
-    );
+    return multiCall.transaction_hash;
   } catch (error) {
     console.error("❌ Transaction error:", {
       error,
@@ -128,13 +112,6 @@ export async function POST(request: NextRequest) {
         privateKeyLength: CHIPI_PRIVATE_KEY?.length,
       },
     });
-
-    return NextResponse.json(
-      {
-        error: "Failed to process transaction",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 },
-    );
+    throw error;
   }
 }

@@ -13,26 +13,26 @@ import {
 export function useWalletBalances() {
   const { account } = useAccount();
 
-  const { data: ethBalance } = useBalance({
+  const { data: ethBalance, refetch: refetchEthBalance } = useBalance({
     address: account?.address as `0x${string}`,
   });
 
-  const { data: usdcBalance } = useBalance({
+  const { data: usdcBalance, refetch: refetchUsdcBalance } = useBalance({
     address: account?.address as `0x${string}`,
     token: USDC_CONTRACT,
   });
 
-  const { data: brotherBalance } = useBalance({
+  const { data: brotherBalance, refetch: refetchBrotherBalance } = useBalance({
     address: account?.address as `0x${string}`,
     token: STARKNET_BROTHER_TOKEN,
   });
 
-  const { data: nstUsdBalance } = useBalance({
+  const { data: nstUsdBalance, refetch: refetchNstUsdBalance } = useBalance({
     address: account?.address as `0x${string}`,
     token: NIMBORA_STAKED_USD,
   });
 
-  const { data: strkBalance } = useReadContract({
+  const { data: strkBalance, refetch: refetchStrkBalance } = useReadContract({
     abi: [
       {
         name: "balance_of",
@@ -56,12 +56,12 @@ export function useWalletBalances() {
     args: [account?.address],
   });
 
-  const { data: alfBalance } = useBalance({
+  const { data: alfBalance, refetch: refetchAlfBalance } = useBalance({
     address: account?.address as `0x${string}`,
     token: ALF_TOKEN,
   });
 
-  const { data: slinkBalance } = useBalance({
+  const { data: slinkBalance, refetch: refetchSlinkBalance } = useBalance({
     address: account?.address as `0x${string}`,
     token: SLINK_TOKEN,
   });
@@ -74,8 +74,14 @@ export function useWalletBalances() {
   const alfValue = alfBalance ? Number(alfBalance.formatted) : 0;
   const slinkValue = slinkBalance ? Number(slinkBalance.formatted) : 0;
 
-  const fetchBalances = () => {
-    // Implement your fetch logic here
+  const refetchBalances = () => {
+    refetchEthBalance();
+    refetchUsdcBalance();
+    refetchBrotherBalance();
+    refetchNstUsdBalance();
+    refetchStrkBalance();
+    refetchAlfBalance();
+    refetchSlinkBalance();
   };
 
   return {
@@ -89,6 +95,6 @@ export function useWalletBalances() {
       cashBalance: ethValue + usdcValue,
       investedBalance: nstUsdValue + strkValue,
     },
-    refetch: fetchBalances,
+    refetchBalances: refetchBalances,
   };
 }

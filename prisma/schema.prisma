@@ -34,6 +34,7 @@ model FeriaCardRedeem {
   username      String
   walletAddress String
   feriaCardCode String
+  txHash        String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

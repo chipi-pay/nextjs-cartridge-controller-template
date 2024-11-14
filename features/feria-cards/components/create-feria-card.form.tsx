@@ -1,6 +1,6 @@
 "use client";
 
-import { useCreateFeriaCard } from "../hooks/useCreateFeriaCard";
+import { useCreateFeriaCard } from "../hooks/use-create-feria-card";
 import { useForm } from "react-hook-form";
 import { ChainEnum, CoinEnum } from "@prisma/client";
 

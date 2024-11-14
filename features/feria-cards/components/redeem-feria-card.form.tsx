@@ -1,6 +1,6 @@
 "use client";
 
-import { useRedeemFeriaCard } from "../hooks/useRedeemFeriaCard";
+import { useRedeemFeriaCard } from "../hooks/use-redeem-feria-card";
 import { useForm } from "react-hook-form";
 
 type RedeemFeriaCardInputs = {

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import Confetti from "react-confetti";
-import { useRedeemFeriaCard } from "@/features/feria/hooks/useRedeemFeriaCard";
+import { useRedeemFeriaCard } from "@/features/feria-cards/hooks/useRedeemFeriaCard";
 import { useAccount } from "@starknet-react/core";
 
 interface RedeemProps {
