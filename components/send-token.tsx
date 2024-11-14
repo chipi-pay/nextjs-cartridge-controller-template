@@ -93,10 +93,16 @@ export function SendToken({ onBack }: SendTokenProps) {
             onChange={(e) => sender.setWallet(e.target.value)}
           />
           <Input
-            type="number"
+            type="text"
             placeholder="Amount"
-            value={sender.amount}
-            onChange={(e) => sender.setAmount(Number(e.target.value))}
+            value={sender.amount || ""}
+            onChange={(e) => {
+              const value = e.target.value;
+              const numberValue = value === "" ? 0 : Number(value);
+              if (!isNaN(numberValue)) {
+                sender.setAmount(numberValue);
+              }
+            }}
           />
           <Button type="submit" className="w-full" disabled={sender.submitted}>
             {sender.submitted ? "Sending..." : "Send"}
