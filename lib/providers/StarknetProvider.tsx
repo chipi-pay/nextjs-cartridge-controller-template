@@ -8,7 +8,7 @@ import { RpcProvider } from "starknet";
 import {
   USDC_CONTRACT as USDC_TOKEN_ADDRESS,
   STRK_FARM_USDC_SENSEI,
-} from "@/app/constants/contracts";
+} from "@/features/web3/constants/contracts";
 
 function provider() {
   return new RpcProvider({

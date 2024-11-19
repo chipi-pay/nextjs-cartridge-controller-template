@@ -8,7 +8,7 @@ import {
   STARKNET_BROTHER_TOKEN,
   ALF_TOKEN,
   SLINK_TOKEN,
-} from "@/app/constants/contracts";
+} from "@/features/web3/constants/contracts";
 
 export function useWalletBalances() {
   const { account } = useAccount();

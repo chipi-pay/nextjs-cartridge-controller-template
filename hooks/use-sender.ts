@@ -8,7 +8,7 @@ import {
   STARKNET_BROTHER_TOKEN,
   SLINK_TOKEN,
   ALF_TOKEN,
-} from "@/app/constants/contracts";
+} from "@/features/web3/constants/contracts";
 
 export const useSendToUsername = () => {
   const [submitted, setSubmitted] = useState<boolean>(false);

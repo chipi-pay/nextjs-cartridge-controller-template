@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useAccount, useTransactionReceipt } from "@starknet-react/core";
-import { connector } from "./providers/StarknetProvider";
+import { connector } from "../lib/providers/StarknetProvider";
 
 import { useRedeemFeriaCard } from "@/features/feria-cards/hooks/use-redeem-feria-card";
 import { UserCard } from "@/features/users/components/user.card";
@@ -87,9 +87,9 @@ export default function HomePage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-[#CCF4E8] p-6">
       <UserCard />
-      <div className="grid grid-cols-2 gap-4">
+      <div className="flex grid grid-cols-2 flex-row flex-col gap-4">
         <BalancesSummaryCard />
         <InvestmentsSummaryCard />
       </div>

@@ -6,10 +6,10 @@ export function SendTokenButton() {
   return (
     <div>
       <button
-        className="h-14 border border-input bg-background text-lg font-medium shadow-sm hover:bg-accent hover:text-accent-foreground"
+        className="flex w-full items-center justify-center rounded-xl border-2 border-black bg-amber-400 p-2.5 text-center text-xl font-semibold hover:bg-amber-500 active:bg-amber-600"
         onClick={() => setShowSendCard(!showSendCard)}
       >
-        Send
+        Send Money
       </button>
       {showSendCard && <SendTokenForm onBack={() => setShowSendCard(false)} />}
     </div>

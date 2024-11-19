@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
-import { connector } from "@/app/providers/StarknetProvider";
+import { connector } from "@/lib/providers/StarknetProvider";
 import { useEffect, useState } from "react";
 
 export function ConnectWalletModal() {

@@ -5,7 +5,7 @@ import {
   SLINK_TOKEN,
   STARKNET_BROTHER_TOKEN,
   ALF_TOKEN,
-} from "@/app/constants/contracts";
+} from "@/features/web3/constants/contracts";
 import { ERC20 } from "@/lib/ABIs/erc20";
 import { CoinEnum } from "@prisma/client";
 

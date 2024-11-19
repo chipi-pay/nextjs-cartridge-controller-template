@@ -24,7 +24,7 @@ interface SendTokenProps {
   onBack: () => void;
 }
 
-export function SendToken({ onBack }: SendTokenProps) {
+export function SendTokenForm({ onBack }: SendTokenProps) {
   const { toast } = useToast();
   const [selectedToken, setSelectedToken] = useState("usdc");
   const usdcSender = useSendToWallet();

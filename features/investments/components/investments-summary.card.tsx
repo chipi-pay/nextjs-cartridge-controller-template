@@ -4,13 +4,14 @@ import { motion } from "framer-motion";
 import { useWalletBalances } from "@/features/balances/hooks/use-wallet-balances";
 import { useEffect, useState } from "react";
 import { toast } from "@/hooks/use-toast";
-import {
-  USDC_CONTRACT,
-  STRK_FARM_USDC_SENSEI,
-  NIMBORA_STAKING_USDC,
-} from "@/app/constants/contracts";
+
 import { useAccount } from "@starknet-react/core";
 import { cairo } from "starknet";
+import {
+  NIMBORA_STAKING_USDC,
+  STRK_FARM_USDC_SENSEI,
+  USDC_CONTRACT,
+} from "@/features/web3/constants/contracts";
 
 export function InvestmentsSummaryCard() {
   const { balances } = useWalletBalances();
