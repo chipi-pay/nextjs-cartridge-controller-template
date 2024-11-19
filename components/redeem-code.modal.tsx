@@ -1,37 +1,24 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import Confetti from "react-confetti";
-import { useRedeemFeriaCard } from "@/features/feria/hooks/useRedeemFeriaCard";
+import { useRedeemFeriaCard } from "@/features/feria-cards/hooks/use-redeem-feria-card";
 import { useAccount } from "@starknet-react/core";
 
-interface RedeemProps {
+interface RedeemCodeModalProps {
   onBack?: () => void;
 }
 
-export function Redeem({ onBack = () => {} }: RedeemProps) {
+export function RedeemCodeModal({ onBack = () => {} }: RedeemCodeModalProps) {
   const [code, setCode] = useState("");
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { account } = useAccount();
   const { mutate: redeemFeriaCard, isPending: isRedeemingFeriaCard } =
     useRedeemFeriaCard();
-
-  // Update dimensions when component mounts
-  useEffect(() => {
-    if (cardRef.current) {
-      setDimensions({
-        width: cardRef.current.offsetWidth,
-        height: cardRef.current.offsetHeight,
-      });
-    }
-  }, []);
 
   const handleRedeem = async () => {
     console.log("Redeeming feria card...", code);
@@ -52,14 +39,10 @@ export function Redeem({ onBack = () => {} }: RedeemProps) {
       },
       {
         onSuccess: (data) => {
-          setShowConfetti(true);
           toast({
             title: "Redeem successful!",
-            description: `Code ${data.cardCode} redeemed successfully`,
+            description: `Code ${data.feriaCardCode} redeemed successfully`,
           });
-          setTimeout(() => {
-            setShowConfetti(false);
-          }, 5000);
         },
         onError: (error) => {
           const errorMessage =
@@ -78,7 +61,7 @@ export function Redeem({ onBack = () => {} }: RedeemProps) {
 
   return (
     <Card className="relative h-[200px] overflow-hidden" ref={cardRef}>
-      {showConfetti && (
+      {/* {showConfetti && (
         <div className="absolute inset-0">
           <Confetti
             width={dimensions.width}
@@ -87,7 +70,7 @@ export function Redeem({ onBack = () => {} }: RedeemProps) {
             numberOfPieces={200}
           />
         </div>
-      )}
+      )} */}
       <CardContent className="flex h-full flex-col pt-6">
         <div className="mb-2 flex items-center justify-between">
           <h3 className="text-sm font-medium text-muted-foreground">

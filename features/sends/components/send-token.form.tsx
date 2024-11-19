@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,8 +32,7 @@ export function SendToken({ onBack }: SendTokenProps) {
   const slinkSender = useSendSlink();
   const alfSender = useSendAlf();
 
-  // Get the active sender based on selected token
-  const getActiveSender = () => {
+  const sender = useMemo(() => {
     switch (selectedToken) {
       case "usdc":
         return usdcSender;
@@ -46,9 +45,7 @@ export function SendToken({ onBack }: SendTokenProps) {
       default:
         return usdcSender;
     }
-  };
-
-  const sender = getActiveSender();
+  }, [selectedToken]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
