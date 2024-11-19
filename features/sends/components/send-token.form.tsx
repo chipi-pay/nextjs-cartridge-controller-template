@@ -18,8 +18,14 @@ import {
   useSendSlink,
   useSendAlf,
 } from "@/hooks/use-sender";
+import { useToast } from "@/hooks/use-toast";
 
-export function SendTokenForm({ onBack }: { onBack: () => void }) {
+interface SendTokenProps {
+  onBack: () => void;
+}
+
+export function SendToken({ onBack }: SendTokenProps) {
+  const { toast } = useToast();
   const [selectedToken, setSelectedToken] = useState("usdc");
   const usdcSender = useSendToWallet();
   const brotherSender = useSendBrotherToken();
@@ -53,7 +59,33 @@ export function SendTokenForm({ onBack }: { onBack: () => void }) {
     const amount =
       sender.amount *
       Math.pow(10, decimals[selectedToken as keyof typeof decimals]);
-    sender.execute({ low: amount, high: 0 });
+
+    sender
+      .execute({ low: amount, high: 0 })
+      .then(() => {
+        if (sender.txnHash) {
+          toast({
+            title: "Transaction Submitted",
+            description: (
+              <a
+                href={`https://starkscan.co/tx/${sender.txnHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                View on Explorer
+              </a>
+            ),
+          });
+        }
+      })
+      .catch((error) => {
+        toast({
+          variant: "destructive",
+          title: "Transaction Failed",
+          description: error.message,
+        });
+      });
   };
 
   return (
@@ -86,10 +118,16 @@ export function SendTokenForm({ onBack }: { onBack: () => void }) {
             onChange={(e) => sender.setWallet(e.target.value)}
           />
           <Input
-            type="number"
+            type="text"
             placeholder="Amount"
-            value={sender.amount}
-            onChange={(e) => sender.setAmount(Number(e.target.value))}
+            value={sender.amount || ""}
+            onChange={(e) => {
+              const value = e.target.value;
+              const numberValue = value === "" ? 0 : Number(value);
+              if (!isNaN(numberValue)) {
+                sender.setAmount(numberValue);
+              }
+            }}
           />
           <Button type="submit" className="w-full" disabled={sender.submitted}>
             {sender.submitted ? "Sending..." : "Send"}
@@ -102,7 +140,7 @@ export function SendTokenForm({ onBack }: { onBack: () => void }) {
             <p className="text-sm text-green-500">
               Transaction submitted! View on{" "}
               <a
-                href={`${sender.explorer}/tx/${sender.txnHash}`}
+                href={`https://starkscan.co/tx/${sender.txnHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline"
