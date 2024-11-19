@@ -4,6 +4,7 @@ import { StarknetProvider } from "@/app/providers/StarknetProvider";
 import { Analytics } from "@vercel/analytics/react";
 import Link from "next/link";
 import Image from "next/image";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Chipi Pay @ Starknet's HH Bangkok",
@@ -29,7 +30,7 @@ export default function RootLayout({
               />
             </Link>
           </div>
-          {children}
+          <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
           <Analytics />
         </StarknetProvider>
       </body>

@@ -39,6 +39,7 @@ export async function sendCardFunds(
     console.log("🚀 Starting new request...");
     const { code, userAddress, amount, coin } = input;
 
+    console.log("cooode", code);
     // Initialize account with specific version and class
     console.log("🔑 Initializing accounts...");
     if (!CHIPI_ADDRESS || !CHIPI_PRIVATE_KEY) {
