@@ -1,18 +1,20 @@
 import { useState } from "react";
-import { Redeem } from "@/components/redeem";
+import { RedeemCodeModal } from "@/components/redeem-code.modal";
 
 export function RedeemFeriaCardButton() {
-  const [showRedeemCard, setShowRedeemCard] = useState(false);
+  const [showRedeemCodeModal, setShowRedeemCodeModal] = useState(false);
 
   return (
     <div className="flex w-full flex-col items-center">
       <button
         className="h-14 border border-input bg-background text-lg font-medium shadow-sm hover:bg-accent hover:text-accent-foreground"
-        onClick={() => setShowRedeemCard(!showRedeemCard)}
+        onClick={() => setShowRedeemCodeModal(!showRedeemCodeModal)}
       >
         Redeem
       </button>
-      {showRedeemCard && <Redeem onBack={() => setShowRedeemCard(false)} />}
+      {showRedeemCodeModal && (
+        <RedeemCodeModal onBack={() => setShowRedeemCodeModal(false)} />
+      )}
     </div>
   );
 }

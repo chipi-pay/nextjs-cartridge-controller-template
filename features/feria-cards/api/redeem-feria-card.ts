@@ -22,7 +22,7 @@ export async function redeemFeriaCard({
         cardCode,
       },
     });
-    if (!existingCard) throw new Error("Feria card not found");
+    if (!existingCard) throw new Error("Feria card code is invalid");
     if (existingCard.maxRedeems === existingCard.redeems)
       throw new Error("Feria card has reached its maximum redeem limit");
 
@@ -36,7 +36,9 @@ export async function redeemFeriaCard({
     });
 
     if (existingRedeems.length >= existingCard.maxRedeemsPerUser)
-      throw new Error("User has reached the maximum redeem limit");
+      throw new Error(
+        "You have already reached the maximum redeem limit for this Card",
+      );
 
     // normalize the wallet address
     const cleanAddress = walletAddress.replace("0x", "");
@@ -51,7 +53,9 @@ export async function redeemFeriaCard({
       coin: existingCard.coin,
     });
 
-    const updatedCard = await prisma.feriaCard.update({
+    console.log("txHash in redeemFeriaCard", txHash);
+
+    await prisma.feriaCard.update({
       where: {
         cardCode,
       },

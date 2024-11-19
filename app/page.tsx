@@ -1,9 +1,13 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { useAccount, useTransactionReceipt } from "@starknet-react/core";
+import {
+  useAccount,
+  useBalance,
+  useTransactionReceipt,
+} from "@starknet-react/core";
 import { connector } from "./providers/StarknetProvider";
 
 import { useRedeemFeriaCard } from "@/features/feria-cards/hooks/use-redeem-feria-card";
@@ -12,109 +16,81 @@ import { InvestmentsSummaryCard } from "@/features/investments/components/invest
 import { BalancesSummaryCard } from "@/features/balances/components/balances-summary.card";
 import { RedeemFeriaCardButton } from "@/features/feria-cards/components/redeem-feria-card.button";
 
-import confetti from "canvas-confetti";
-
 import { ConnectWalletModal } from "@/components/connect-wallet.modal";
-import { Card, CardContent } from "@/components/ui/card";
 import { SendTokenButton } from "@/features/sends/components/send-token.button";
-import { useWalletBalances } from "@/features/balances/hooks/use-wallet-balances";
-import { SuccessfulTransactionReceiptResponse } from "starknet";
+// import { useWalletBalances } from "@/features/balances/hooks/use-wallet-balances";
+import { STARKNET_BROTHER_TOKEN } from "./constants/contracts";
 
 export default function HomePage() {
   const searchParams = useSearchParams();
   const { account } = useAccount();
   const { toast } = useToast();
-  const { refetchBalances } = useWalletBalances();
-  const { mutate: redeemFeriaCard, data: redeemedCard } = useRedeemFeriaCard();
+  // const { refetchBalances } = useWalletBalances();
+  const { refetch: refetchBrotherBalance, data: brotherBalance } = useBalance({
+    address: account?.address as `0x${string}`,
+    token: STARKNET_BROTHER_TOKEN,
+  });
+  console.log("brotherBalance", brotherBalance);
+  const { mutateAsync: redeemFeriaCard, data: redeemedCard } =
+    useRedeemFeriaCard();
   const { data: redeemedCardReceipt } = useTransactionReceipt({
     hash: redeemedCard?.txHash,
     enabled: !!redeemedCard,
   });
-
   const [redeemMessage, setRedeemMessage] = useState<string>("");
 
   useEffect(() => {
     const processRedeem = async () => {
       if (!account?.address) return;
-
       const code = searchParams.get("code");
-      if (!code) {
-        console.log("❌ No redeem code found");
-        return;
-      }
-
-      if (!account?.address) {
-        console.log("⏳ Waiting for addresses to be set...");
-        return;
-      }
-
+      if (!code) return;
       const username = await connector.username();
-
-      if (!username) {
-        return;
-      }
-
-      try {
-        redeemFeriaCard(
-          {
-            cardCode: code,
-            walletAddress: account.address,
-            username,
+      if (!username) return;
+      await redeemFeriaCard(
+        {
+          cardCode: code,
+          walletAddress: account.address,
+          username,
+        },
+        {
+          onError: (error) => {
+            const errorMessage =
+              error instanceof Error
+                ? error.message
+                : "Failed to process rewards. Please try again later.";
+            setRedeemMessage(errorMessage);
+            toast({
+              title: "Redeem failed",
+              description: errorMessage,
+              variant: "destructive",
+            });
           },
-          {
-            onSuccess: async (redeemedCard) => {
-              const { transaction_hash: transactionHash, execution_status } =
-                (await account?.waitForTransaction(
-                  redeemedCard.txHash,
-                )) as SuccessfulTransactionReceiptResponse;
+        },
+      );
+    };
+    try {
+      processRedeem();
+    } catch (error) {
+      console.error(error);
+    }
+  }, [account]);
 
-              confetti({
-                particleCount: 100,
-                spread: 70,
-                origin: { y: 0.6 },
-              });
-              setRedeemMessage(
-                `You redem code ${redeemedCard.amount} ChipiFeria successfully`,
-              );
-              toast({
-                title: "Redeem successful!",
-                description: "Code redeemed successfully",
-              });
-              setTimeout(() => {
-                window.location.href = "/";
-              }, 2000);
-              return;
-            },
-            onError: (error) => {
-              const errorMessage =
-                error instanceof Error
-                  ? error.message
-                  : "Failed to process rewards. Please try again later.";
-              setRedeemMessage(errorMessage);
-              toast({
-                title: "Redeem failed",
-                description: errorMessage,
-                variant: "destructive",
-              });
-            },
-          },
+  useEffect(() => {
+    const updateBalances = async () => {
+      console.log("redeemedCardReceipt activated", redeemedCardReceipt);
+      if (redeemedCardReceipt?.isSuccess) {
+        setRedeemMessage(
+          `You redem code ${redeemedCard?.feriaCardCode} ChipiFeria successfully`,
         );
-      } catch (error) {
-        console.error("❌ Fetch error:", error);
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : "Failed to process rewards. Please try again later.";
-        setRedeemMessage(errorMessage);
         toast({
-          title: "Redeem failed",
-          description: errorMessage,
-          variant: "destructive",
+          title: "Redeem successful!",
+          description: "Code redeemed successfully",
         });
+        await refetchBrotherBalance();
       }
     };
-    processRedeem();
-  }, [account]);
+    updateBalances();
+  }, [redeemedCardReceipt]);
 
   if (!account) {
     return <ConnectWalletModal />;
@@ -128,11 +104,9 @@ export default function HomePage() {
         <InvestmentsSummaryCard />
       </div>
       {redeemMessage && (
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-center text-gray-700">{redeemMessage}</p>
-          </CardContent>
-        </Card>
+        <div className="mx-2 flex flex-col rounded-xl border border-2 border-black bg-card p-6 text-card-foreground">
+          <p className="text-center text-gray-700">{redeemMessage}</p>
+        </div>
       )}
       <div className="grid grid-cols-2 gap-4">
         <SendTokenButton />
