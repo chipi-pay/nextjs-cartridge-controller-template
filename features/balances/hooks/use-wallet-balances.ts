@@ -74,6 +74,18 @@ export function useWalletBalances() {
   const alfValue = alfBalance ? Number(alfBalance.formatted) : 0;
   const slinkValue = slinkBalance ? Number(slinkBalance.formatted) : 0;
 
+  const refetchBalancesWithDelay = (delayInMs: number) => {
+    setTimeout(() => {
+      refetchEthBalance();
+      refetchUsdcBalance();
+      refetchBrotherBalance();
+      refetchNstUsdBalance();
+      refetchStrkBalance();
+      refetchAlfBalance();
+      refetchSlinkBalance();
+    }, delayInMs);
+  };
+
   return {
     account,
     balances: {
@@ -85,12 +97,6 @@ export function useWalletBalances() {
       cashBalance: ethValue + usdcValue,
       investedBalance: nstUsdValue + strkValue,
     },
-    refetchEthBalance,
-    refetchUsdcBalance,
-    refetchBrotherBalance,
-    refetchNstUsdBalance,
-    refetchStrkBalance,
-    refetchAlfBalance,
-    refetchSlinkBalance,
+    refetchBalancesWithDelay,
   };
 }

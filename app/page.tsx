@@ -3,11 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import {
-  useAccount,
-  useBalance,
-  useTransactionReceipt,
-} from "@starknet-react/core";
+import { useAccount, useTransactionReceipt } from "@starknet-react/core";
 import { connector } from "./providers/StarknetProvider";
 
 import { useRedeemFeriaCard } from "@/features/feria-cards/hooks/use-redeem-feria-card";
@@ -18,19 +14,13 @@ import { RedeemFeriaCardButton } from "@/features/feria-cards/components/redeem-
 
 import { ConnectWalletModal } from "@/components/connect-wallet.modal";
 import { SendTokenButton } from "@/features/sends/components/send-token.button";
-// import { useWalletBalances } from "@/features/balances/hooks/use-wallet-balances";
-import { STARKNET_BROTHER_TOKEN } from "./constants/contracts";
+import { useWalletBalances } from "@/features/balances/hooks/use-wallet-balances";
 
 export default function HomePage() {
   const searchParams = useSearchParams();
   const { account } = useAccount();
   const { toast } = useToast();
-  // const { refetchBalances } = useWalletBalances();
-  const { refetch: refetchBrotherBalance, data: brotherBalance } = useBalance({
-    address: account?.address as `0x${string}`,
-    token: STARKNET_BROTHER_TOKEN,
-  });
-  console.log("brotherBalance", brotherBalance);
+  const { refetchBalancesWithDelay } = useWalletBalances();
   const { mutateAsync: redeemFeriaCard, data: redeemedCard } =
     useRedeemFeriaCard();
   const { data: redeemedCardReceipt } = useTransactionReceipt({
@@ -86,7 +76,7 @@ export default function HomePage() {
           title: "Redeem successful!",
           description: "Code redeemed successfully",
         });
-        await refetchBrotherBalance();
+        refetchBalancesWithDelay(3000);
       }
     };
     updateBalances();
