@@ -31,13 +31,9 @@ export function UserCard() {
   };
 
   return (
-    <div className="flex items-start gap-4 border-2 border-black bg-white p-6">
+    <div className="flex items-start gap-4 rounded-xl border-2 border-black bg-white p-6">
       <div className="relative flex h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-primary">
-        <img
-          src="/sherk.jpeg?height=48&width=48"
-          alt="@wellsja"
-          className="aspect-square h-full w-full"
-        />
+        <img src="/pochita.png" alt="profile-picture" className="h-12 w-auto" />
         <div className="flex h-full w-full items-center justify-center rounded-full bg-muted">
           JW
         </div>

@@ -11,6 +11,10 @@ const FeatureList = [
     url: "/",
   },
   {
+    title: "investments",
+    url: "/investments",
+  },
+  {
     title: "history",
     url: "/transactions-history",
   },
@@ -24,7 +28,8 @@ export function FeaturesNavbar() {
           key={index}
           href={feature.url}
           className={`flex w-36 items-center justify-center text-center text-lg focus:outline-none ${
-            currentPath.includes(feature.url)
+            (feature.url === "/" && currentPath === "/") ||
+            (feature.url !== "/" && currentPath.includes(feature.url))
               ? "font-medium text-orange-500 underline"
               : "text-black"
           }`}

@@ -41,6 +41,21 @@ model FeriaCardRedeem {
   FeriaCard FeriaCard @relation(fields: [feriaCardCode], references: [cardCode])
 }
 
+model Investment {
+  id               String           @id
+  dynamicUserId    String
+  investmentOption InvestmentOption
+  amountInvested   Float
+  amountGenerated  Float
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+enum InvestmentOption {
+  NIMBORA
+  STARKFARM
+}
+
 enum ChainEnum {
   STARKNET
 }

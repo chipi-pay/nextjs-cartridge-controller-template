@@ -10,11 +10,12 @@ import { useRedeemFeriaCard } from "@/features/feria-cards/hooks/use-redeem-feri
 import { UserCard } from "@/features/users/components/user.card";
 import { InvestmentsSummaryCard } from "@/features/investments/components/investments-summary.card";
 import { BalancesSummaryCard } from "@/features/balances/components/balances-summary.card";
-import { RedeemFeriaCardButton } from "@/features/feria-cards/components/redeem-feria-card.button";
 
 import { ConnectWalletModal } from "@/components/connect-wallet.modal";
-import { SendTokenButton } from "@/features/sends/components/send-token.button";
 import { useWalletBalances } from "@/features/balances/hooks/use-wallet-balances";
+import { SendTokenButton } from "@/features/sends/components/send-token.button";
+import { ReceiveTokenButton } from "@/features/sends/components/receive-token.button";
+import Link from "next/link";
 
 export default function HomePage() {
   const searchParams = useSearchParams();
@@ -89,19 +90,23 @@ export default function HomePage() {
   return (
     <div className="space-y-6 bg-[#CCF4E8] p-6">
       <UserCard />
-      <div className="flex grid grid-cols-2 flex-row flex-col gap-4">
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <SendTokenButton />
+        <ReceiveTokenButton />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <BalancesSummaryCard />
-        <InvestmentsSummaryCard />
+        <Link href="/investments" className="w-full">
+          <InvestmentsSummaryCard />
+        </Link>
       </div>
       {redeemMessage && (
         <div className="mx-2 flex flex-col rounded-xl border border-2 border-black bg-card p-6 text-card-foreground">
           <p className="text-center text-gray-700">{redeemMessage}</p>
         </div>
       )}
-      <div className="grid grid-cols-2 gap-4">
-        <SendTokenButton />
-        <RedeemFeriaCardButton />
-      </div>
     </div>
   );
 }

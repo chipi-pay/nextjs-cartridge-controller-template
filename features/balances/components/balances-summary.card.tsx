@@ -1,26 +1,34 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { useWalletBalances } from "@/features/balances/hooks/use-wallet-balances";
+import { RedeemFeriaCardButton } from "@/features/feria-cards/components/redeem-feria-card.button";
 
 export function BalancesSummaryCard() {
   const { balances } = useWalletBalances();
 
   return (
-    <Card>
-      <CardContent className="pt-6">
-        <h3 className="mb-2 text-sm font-medium text-muted-foreground">
-          Cash Balance
-        </h3>
-        <p className="text-2xl font-bold">${balances.cashBalance.toFixed(2)}</p>
-        <div className="mt-2 text-sm text-muted-foreground">
-          <div>ETH: {balances.eth.toFixed(5)}</div>
-          <div>USDC: ${balances.usdc.toFixed(2)}</div>
-          <div>STARKNET BROTHER: {balances.brother.toFixed(2)}</div>
-          <div>ALF: {balances.alf.toFixed(2)}</div>
-          <div>SLINK: {balances.slink.toFixed(2)}</div>
+    <div className="flex flex-col justify-between rounded-xl border-2 border-black bg-white p-6">
+      <div className="flex h-full flex-col justify-between gap-3">
+        <div className="flex flex-col text-center">
+          <h3 className="text-sm font-medium text-muted-foreground">
+            CASH BALANCE
+          </h3>
+          <p className="text-5xl font-bold">
+            ${balances.cashBalance.toFixed(2)}
+          </p>
         </div>
-      </CardContent>
-    </Card>
+        <div className="flex flex-col items-center justify-center text-center">
+          <h3 className="text-sm font-medium text-muted-foreground">
+            LATEST REDEEM
+          </h3>
+          <div className="flex inline-flex w-fit flex-row items-center justify-center gap-2 p-2">
+            <p className="flex items-center justify-center text-xl font-medium">
+              Bangalore, India | 12/12/2024 | $100
+            </p>
+          </div>
+        </div>
+        <RedeemFeriaCardButton />
+      </div>
+    </div>
   );
 }

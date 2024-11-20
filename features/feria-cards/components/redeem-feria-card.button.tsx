@@ -7,10 +7,10 @@ export function RedeemFeriaCardButton() {
   return (
     <div className="flex w-full flex-col items-center">
       <button
-        className="flex w-full items-center justify-center rounded-xl border-2 border-black bg-emerald-400 p-2.5 text-center text-xl font-semibold hover:bg-emerald-500 active:bg-emerald-600"
+        className="flex w-full items-center justify-center rounded-xl border-2 border-black bg-white p-2.5 text-center text-xl font-medium hover:bg-rose-50 active:bg-rose-100"
         onClick={() => setShowRedeemCodeModal(!showRedeemCodeModal)}
       >
-        Redeem
+        Redeem Code
       </button>
       {showRedeemCodeModal && (
         <RedeemCodeModal onBack={() => setShowRedeemCodeModal(false)} />
